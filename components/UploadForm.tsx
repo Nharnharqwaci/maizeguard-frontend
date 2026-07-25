@@ -3,16 +3,93 @@
 import { Upload, Camera, X } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 
+type Language = "en" | "tw" | "dag";
+
+const T: Record<string, Record<Language, string>> = {
+  takePhoto: {
+    en: "Take a Photo",
+    tw: "Twa Mfonini",
+    dag: "Twa Nimli",
+  },
+  cameraPermissionDenied: {
+    en: "Camera permission denied. Please allow camera access in your browser settings.",
+    tw: "Wɔanka camera ho kwan. Yɛsrɛ wo ma camera kwan wɔ wo browser settings mu.",
+    dag: "Camera kpeema biɛla. Yɛn camera kpeema wɔ browser settings ni.",
+  },
+  cameraAccessFailed: {
+    en: "Could not access camera. Please use the Upload option instead.",
+    tw: "Ɛntumi nnyaa camera. Yɛsrɛ wo fa Upload no fa so.",
+    dag: "N-tum nya camera. Yɛn Upload option ni.",
+  },
+  close: {
+    en: "Close",
+    tw: "To mu",
+    dag: "To",
+  },
+  cancel: {
+    en: "Cancel",
+    tw: "Gyae",
+    dag: "Gyae",
+  },
+  capturePhoto: {
+    en: "Capture Photo",
+    tw: "Twa Mfonini",
+    dag: "Twa Nimli",
+  },
+  uploadOrTakePhoto: {
+    en: "Upload or Take a Photo",
+    tw: "Twe anaa Twa Mfonini",
+    dag: "Zaŋ bee Twa Nimli",
+  },
+  supportedFormats: {
+    en: "JPG, JPEG, PNG supported",
+    tw: "JPG, JPEG, PNG na wɔgye",
+    dag: "JPG, JPEG, PNG nima",
+  },
+  useButtonsBelow: {
+    en: "Use the buttons below to get started",
+    tw: "Fa buttons a ɛwɔ aseɛ ha no fa ahyɛ aseɛ",
+    dag: "Zaŋ buttons niŋ ase",
+  },
+  changePhoto: {
+    en: "Change Photo",
+    tw: "Sesa Mfonini",
+    dag: "Sɔŋ Nimli",
+  },
+  uploadPhoto: {
+    en: "Upload Photo",
+    tw: "Twe Mfonini",
+    dag: "Zaŋ Nimli",
+  },
+  retakePhoto: {
+    en: "Retake Photo",
+    tw: "San Twa Mfonini",
+    dag: "Twa Nimli Labi",
+  },
+  takePhotoBtn: {
+    en: "Take Photo",
+    tw: "Twa Mfonini",
+    dag: "Twa Nimli",
+  },
+  useButtonsToChange: {
+    en: "Use buttons below to change",
+    tw: "Fa buttons a ɛwɔ aseɛ ha no sesa",
+    dag: "Zaŋ buttons niŋ sɔŋ",
+  },
+};
+
 interface UploadFormProps {
   preview: string;
   fileName: string;
   onFileSelect: (file: File) => void;
+  language?: Language;
 }
 
 export default function UploadForm({
   preview,
   fileName,
   onFileSelect,
+  language = "en",
 }: UploadFormProps) {
   const uploadRef = useRef<HTMLInputElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -22,6 +99,8 @@ export default function UploadForm({
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraError, setCameraError] = useState("");
   const [isMobile, setIsMobile] = useState(false);
+
+  const t = (key: string) => T[key]?.[language] ?? key;
 
   useEffect(() => {
     setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
@@ -64,8 +143,8 @@ export default function UploadForm({
     } catch (err: any) {
       setCameraError(
         err.name === "NotAllowedError"
-          ? "Camera permission denied. Please allow camera access in your browser settings."
-          : "Could not access camera. Please use the Upload option instead."
+          ? t("cameraPermissionDenied")
+          : t("cameraAccessFailed")
       );
     }
   };
@@ -120,7 +199,7 @@ export default function UploadForm({
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-700">
               <h3 className="font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                 <Camera size={18} className="text-green-600" />
-                Take a Photo
+                {t("takePhoto")}
               </h3>
               <button
                 onClick={closeCamera}
@@ -138,7 +217,7 @@ export default function UploadForm({
                   onClick={closeCamera}
                   className="px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm font-medium"
                 >
-                  Close
+                  {t("close")}
                 </button>
               </div>
             ) : (
@@ -160,14 +239,14 @@ export default function UploadForm({
                     onClick={closeCamera}
                     className="px-6 py-3 border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-xl font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition"
                   >
-                    Cancel
+                    {t("cancel")}
                   </button>
                   <button
                     onClick={capturePhoto}
                     className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition flex items-center gap-2"
                   >
                     <Camera size={18} />
-                    Capture Photo
+                    {t("capturePhoto")}
                   </button>
                 </div>
               </>
@@ -188,7 +267,7 @@ export default function UploadForm({
             <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white p-3 flex items-center justify-between">
               <p className="font-medium text-sm truncate">{fileName}</p>
               <span className="text-xs opacity-70 ml-2">
-                Use buttons below to change
+                {t("useButtonsToChange")}
               </span>
             </div>
           </div>
@@ -199,13 +278,13 @@ export default function UploadForm({
               <Camera size={36} className="text-green-600" />
             </div>
             <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
-              Upload or Take a Photo
+              {t("uploadOrTakePhoto")}
             </h2>
             <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
-              JPG, JPEG, PNG supported
+              {t("supportedFormats")}
             </p>
             <p className="text-green-700 dark:text-green-400 mt-1 text-sm font-medium">
-              Use the buttons below to get started
+              {t("useButtonsBelow")}
             </p>
           </div>
         )}
@@ -219,7 +298,7 @@ export default function UploadForm({
           className="flex items-center justify-center gap-2 border-2 border-green-500 dark:border-green-600 text-green-700 dark:text-green-400 py-3 rounded-xl font-semibold hover:bg-green-50 dark:hover:bg-green-950 transition text-sm"
         >
           <Upload size={17} />
-          {preview ? "Change Photo" : "Upload Photo"}
+          {preview ? t("changePhoto") : t("uploadPhoto")}
         </button>
 
         <button
@@ -228,7 +307,7 @@ export default function UploadForm({
           className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold transition text-sm"
         >
           <Camera size={17} />
-          {preview ? "Retake Photo" : "Take Photo"}
+          {preview ? t("retakePhoto") : t("takePhotoBtn")}
         </button>
       </div>
 
