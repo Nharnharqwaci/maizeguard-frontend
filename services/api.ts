@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://maizeguard-backend-s7ak.onrender.com" 
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 });
 
 export default api;
