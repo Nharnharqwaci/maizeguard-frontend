@@ -111,7 +111,7 @@ export default function Navbar({ language = "en", onLanguageChange }: NavbarProp
             <Link href="/" className="flex items-center gap-2">
               <span className="text-2xl">🌽</span>
               <div>
-                <h1 className="font-bold text-green-700 dark:text-green-400">MaizeAI</h1>
+                <h1 className="font-bold text-green-700 dark:text-green-400">MaizeGuard</h1>
                 <p className="text-xs text-slate-500 dark:text-slate-400">Smart Crop Diagnosis</p>
               </div>
             </Link>
@@ -142,7 +142,7 @@ export default function Navbar({ language = "en", onLanguageChange }: NavbarProp
           <Link href="/" className="flex items-center gap-2">
             <span className="text-2xl">🌽</span>
             <div>
-              <h1 className="font-bold text-green-700 dark:text-green-400">MaizeGuide</h1>
+              <h1 className="font-bold text-green-700 dark:text-green-400">MaizeGuard</h1>
               <p className="text-xs text-slate-500 dark:text-slate-400">Smart Crop Diagnosis</p>
             </div>
           </Link>
