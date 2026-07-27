@@ -8,9 +8,9 @@ type Language = "en" | "tw" | "dag";
 
 const T: Record<string, Record<Language, string>> = {
   heroTitle: {
-    en: "About MaizeGuide",
-    tw: "MaizeGuide Ho Nsɛm",
-    dag: "MaizeGuide Yɛl'",
+    en: "About MaizeGuard",
+    tw: "MaizeGuard Ho Nsɛm",
+    dag: "MaizeGuard Yɛl'",
   },
   heroDesc: {
     en: "Empowering farmers with AI-driven maize disease detection for healthier crops and improved food security.",
