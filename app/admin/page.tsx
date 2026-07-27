@@ -29,6 +29,9 @@ import {
   Moon,
   Sun,
   ChevronDown,
+  KeyRound,
+  Copy,
+  CheckCircle,
 } from "lucide-react";
 
 type Language = "en" | "tw" | "dag";
@@ -112,8 +115,12 @@ const T: Record<string, Record<Language, string>> = {
   mostActiveUser: { en: "Most Active User", tw: "Onipa a Ɔyɛ Adwuma", dag: "Biniŋ din Tuuma" },
   guestUser: { en: "Guest User", tw: "Ɔhɔhoɔ Dwumadifoɔ", dag: "Saan Tumda" },
   scansPerformed: { en: "scans performed", tw: "nhwehwɛmu a wɔayɛ", dag: "kparibɔ ni wɔ tuuli" },
+  resetPassword: { en: "Reset Password", tw: "San To Paswɛde", dag: "Lab'li yɛltɔɣ' kpɛma" },
+  passwordResetSuccess: { en: "Password reset! Temporary password copied.", tw: "Paswɛde asan! Wɔakɔpi paswɛde foforo.", dag: "Yɛltɔɣ' kpɛma lab'li! N-nyɛ copy." },
+  tempPassword: { en: "Temporary Password", tw: "Paswɛde Foforo", dag: "Yɛltɔɣ' kpɛma pampam" },
+  copy: { en: "Copy", tw: "Kɔpi", dag: "Copy" },
+  close: { en: "Close", tw: "To mu", dag: "Toom" },
 };
-
 interface AnalyticsData {
   users: {
     total: number;
@@ -240,7 +247,6 @@ function displayName(name: string, tFn?: (k: string) => string): string {
   }
   return name;
 }
-
 export default function AdminPage() {
   const router = useRouter();
   const [language, setLanguage] = useState<Language>("en");
@@ -271,17 +277,20 @@ export default function AdminPage() {
 
   const [activeTab, setActiveTab] = useState<"analytics" | "users" | "scans" | "activity">("analytics");
 
-  // Register modal
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [registerForm, setRegisterForm] = useState({
     full_name: "", phone_number: "", password: "", role: "farmer"
   });
   const [registerLoading, setRegisterLoading] = useState(false);
 
-  // View user scans modal
   const [viewUserId, setViewUserId] = useState<string | null>(null);
   const [userScans, setUserScans] = useState<any[]>([]);
   const [userScansLoading, setUserScansLoading] = useState(false);
+
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetUserName, setResetUserName] = useState("");
+  const [resetTempPassword, setResetTempPassword] = useState("");
+  const [resetCopied, setResetCopied] = useState(false);
   const [showLangPicker, setShowLangPicker] = useState(false);
   const langPickerRef = useRef<HTMLDivElement>(null);
 
@@ -290,12 +299,10 @@ export default function AdminPage() {
 
   const getToken = () => localStorage.getItem("token") || "";
 
-  // ===== Mount & Auth check =====
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // ===== Lang picker click-outside =====
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (langPickerRef.current && !langPickerRef.current.contains(e.target as Node)) {
@@ -306,7 +313,6 @@ export default function AdminPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ===== Auth check on mount =====
   useEffect(() => {
     const savedLang = localStorage.getItem("chat_language") as Language | null;
     if (savedLang && ["en", "tw", "dag"].includes(savedLang)) setLanguage(savedLang);
@@ -320,7 +326,6 @@ export default function AdminPage() {
     setCheckingAuth(false);
   }, [router]);
 
-  // ===== Data loaders =====
   const loadAnalytics = useCallback(async () => {
     try {
       setAnalyticsLoading(true);
@@ -367,7 +372,6 @@ export default function AdminPage() {
     finally { setActivityLoading(false); }
   }, []);
 
-  // ===== Auto-load when tab / page / filter changes =====
   useEffect(() => {
     if (isAdmin && !checkingAuth) loadAnalytics();
   }, [isAdmin, checkingAuth, loadAnalytics]);
@@ -384,7 +388,6 @@ export default function AdminPage() {
     if (isAdmin && !checkingAuth && activeTab === "activity") loadActivity();
   }, [isAdmin, checkingAuth, activeTab, loadActivity]);
 
-  // ===== Handlers =====
   const handleRefresh = () => {
     loadAnalytics();
     if (activeTab === "users") loadUsers();
@@ -443,6 +446,25 @@ export default function AdminPage() {
     finally { setUserScansLoading(false); }
   };
 
+  const handleResetPassword = async (userId: string, userName: string) => {
+    try {
+      const tk = encodeURIComponent(getToken());
+      const res = await api.post(`/api/admin/users/${userId}/reset-password?token=${tk}`);
+      setResetUserName(userName);
+      setResetTempPassword(res.data.temp_password);
+      setShowResetModal(true);
+      setResetCopied(false);
+    } catch (e: any) {
+      alert(e?.response?.data?.detail || "Password reset failed");
+    }
+  };
+
+  const handleCopyResetPassword = () => {
+    navigator.clipboard.writeText(resetTempPassword);
+    setResetCopied(true);
+    setTimeout(() => setResetCopied(false), 2000);
+  };
+
   const diseaseOptions = ["all", "Healthy", "Common_Rust", "Gray_Leaf_Spot", "MSV", "Northern_Leaf_Blight", "Southern_Leaf_Blight", "Uncertain"];
 
   if (!mounted || checkingAuth) {
@@ -475,7 +497,6 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
-      {/* Header */}
       <header className="bg-slate-900 dark:bg-slate-950 border-b border-slate-800 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
@@ -489,7 +510,6 @@ export default function AdminPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              {/* Language Selector */}
               <div className="relative" ref={langPickerRef}>
                 <button
                   onClick={() => setShowLangPicker((v) => !v)}
@@ -499,7 +519,6 @@ export default function AdminPage() {
                   <span className="uppercase text-xs font-bold">{language}</span>
                   <ChevronDown size={12} />
                 </button>
-
                 {showLangPicker && (
                   <div className="absolute right-0 top-full mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1.5 z-50 min-w-[160px] overflow-hidden">
                     {(["en", "tw", "dag"] as Language[]).map((lang) => (
@@ -526,7 +545,6 @@ export default function AdminPage() {
                   </div>
                 )}
               </div>
-
               <button
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                 className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-sm transition-colors"
@@ -548,7 +566,6 @@ export default function AdminPage() {
         </div>
       </header>
 
-      {/* Tabs */}
       <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex gap-1">
@@ -568,10 +585,8 @@ export default function AdminPage() {
       </div>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* ========== ANALYTICS TAB ========== */}
         {activeTab === "analytics" && (
           <div className="space-y-8">
-            {/* Stats Grid */}
             <div className="grid md:grid-cols-4 gap-4">
               {[
                 { label: t("totalUsers"), value: analytics?.users.total ?? 0, icon: Users, color: "blue" },
@@ -597,7 +612,6 @@ export default function AdminPage() {
               ))}
             </div>
 
-            {/* Most Active User */}
             {analytics?.scans.most_active_user && (
               <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-6 text-white">
                 <div className="flex items-center gap-3 mb-2">
@@ -613,9 +627,7 @@ export default function AdminPage() {
               </div>
             )}
 
-            {/* Charts Row */}
             <div className="grid md:grid-cols-3 gap-6">
-              {/* Disease Breakdown */}
               <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
                   <PieChart size={18} className="text-purple-600" />
@@ -648,7 +660,6 @@ export default function AdminPage() {
                 )}
               </div>
 
-              {/* Language Distribution */}
               <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
                   <Globe size={18} className="text-blue-600" />
@@ -684,7 +695,6 @@ export default function AdminPage() {
                 )}
               </div>
 
-              {/* Health Rate */}
               <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
                   <Activity size={18} className="text-green-600" />
@@ -709,7 +719,6 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* Monthly Trends */}
             <div className="grid md:grid-cols-2 gap-6">
               <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
@@ -752,7 +761,6 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* Daily Activity Chart */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
                 <Activity size={18} className="text-orange-600" />
@@ -775,8 +783,6 @@ export default function AdminPage() {
             </div>
           </div>
         )}
-
-        {/* ========== USERS TAB ========== */}
         {activeTab === "users" && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
             <div className="p-6 border-b border-slate-200 dark:border-slate-700">
@@ -811,7 +817,6 @@ export default function AdminPage() {
                 </div>
               </div>
             </div>
-
             {usersLoading ? (
               <div className="p-8 text-center text-slate-400">{t("loading")}</div>
             ) : users.length === 0 ? (
@@ -871,6 +876,9 @@ export default function AdminPage() {
                                 <Leaf size={13} />
                               </button>
                             )}
+                            <button onClick={() => handleResetPassword(user.id, user.full_name)} className="p-1.5 bg-amber-100 dark:bg-amber-900 text-amber-600 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-800" title={t("resetPassword")}>
+                              <KeyRound size={13} />
+                            </button>
                             <button onClick={() => handleDeleteUser(user.id)} className="p-1.5 bg-red-100 dark:bg-red-900 text-red-600 rounded-lg hover:bg-red-200 dark:hover:bg-red-800" title={t("delete")}>
                               <Trash2 size={13} />
                             </button>
@@ -891,8 +899,6 @@ export default function AdminPage() {
             )}
           </div>
         )}
-
-        {/* ========== SCANS TAB ========== */}
         {activeTab === "scans" && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
             <div className="p-6 border-b border-slate-200 dark:border-slate-700">
@@ -977,7 +983,6 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* ========== ACTIVITY TAB ========== */}
         {activeTab === "activity" && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm p-6">
             <div className="flex items-center gap-2 mb-6">
@@ -1021,7 +1026,6 @@ export default function AdminPage() {
           </div>
         )}
       </main>
-
       {/* Register Modal */}
       {showRegisterModal && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
@@ -1061,6 +1065,49 @@ export default function AdminPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Password Modal */}
+      {showResetModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50">{t("resetPassword")}</h3>
+              <button onClick={() => setShowResetModal(false)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                <X size={20} className="text-slate-500" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                {t("passwordResetSuccess")}
+              </p>
+              <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
+                <p className="text-xs text-amber-600 dark:text-amber-400 font-medium uppercase tracking-wider mb-1">{t("tempPassword")}</p>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 text-lg font-mono font-bold text-amber-800 dark:text-amber-300 tracking-wider">
+                    {resetTempPassword}
+                  </code>
+                  <button
+                    onClick={handleCopyResetPassword}
+                    className="p-2 bg-amber-100 dark:bg-amber-900 hover:bg-amber-200 dark:hover:bg-amber-800 rounded-lg transition-colors"
+                    title={t("copy")}
+                  >
+                    {resetCopied ? <CheckCircle size={16} className="text-green-600" /> : <Copy size={16} className="text-amber-600 dark:text-amber-400" />}
+                  </button>
+                </div>
+              </div>
+              <p className="text-xs text-slate-400">
+                User: <span className="font-semibold text-slate-600 dark:text-slate-300">{resetUserName}</span>
+              </p>
+              <button
+                onClick={() => setShowResetModal(false)}
+                className="w-full py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-50 rounded-xl font-medium transition-colors"
+              >
+                {t("close")}
+              </button>
+            </div>
           </div>
         </div>
       )}

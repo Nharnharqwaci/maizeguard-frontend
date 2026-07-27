@@ -94,7 +94,7 @@ export default function AgricChatbot({
   const audioChunksRef = useRef<Blob[]>([]);
   const recordingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // TTS states - backend Abena AI + browser fallback
+  // TTS states - backend Meta MMS + browser fallback
   const [showTtsSettings, setShowTtsSettings] = useState(false);
   const [ttsSpeed, setTtsSpeed] = useState(1.0);
   const [ttsVoice, setTtsVoice] = useState<string>("default");
@@ -176,20 +176,20 @@ export default function AgricChatbot({
 
       if (p === "Healthy") {
         const enPart = `Good news — your maize leaf looks **Healthy** (${confidence?.toFixed(1)}% confidence). No disease detected. How can I help you?`;
-        const twPart = `Asɛm pa — wo aburow nhahan no yɛ **Apɔwmuden** (${confidence?.toFixed(1)}% confidence). Yaree biara nni hɔ. Wopɛ sɛ meboa wo dɛn?`;
+        const twPart = `Asɛm pa — wo aburo nhahan no yɛ **Apɔwmuden** (${confidence?.toFixed(1)}% confidence). Yaree biara nni hɔ. Wopɛ sɛ meboa wo dɛn?`;
         const dagPart = `Kpalim zaa — a maize kpamli n yɛ **Kpalim zaa** (${confidence?.toFixed(1)}% confidence). Kparibɔ kuɣu biɛla. N yɛli n-ti a shɛli?`;
         const body = lang === "tw" ? twPart : lang === "dag" ? dagPart : enPart;
         return `${greeting} ${body}`;
       }
       if (p) {
         const enPart = `I can see your maize leaf has been diagnosed with **${p.replace(/_/g, " ")}** (${confidence?.toFixed(1)}% confidence). How can I help you?`;
-        const twPart = `Mahu sɛ wo aburow nhahan no wɔ **${p.replace(/_/g, " ")}** yaree mu (${confidence?.toFixed(1)}% confidence). Wopɛ sɛ meboa wo dɛn?`;
+        const twPart = `Mahu sɛ wo aburo nhahan no wɔ **${p.replace(/_/g, " ")}** yaree mu (${confidence?.toFixed(1)}% confidence). Wopɛ sɛ meboa wo dɛn?`;
         const dagPart = `N nya a maize kpamli n nyɛ **${p.replace(/_/g, " ")}** (${confidence?.toFixed(1)}% confidence). N yɛli n-ti a shɛli?`;
         const body = lang === "tw" ? twPart : lang === "dag" ? dagPart : enPart;
         return `${greeting} ${body}`;
       }
       const enPart = `I'm here to help you with maize disease management, farming practices, and crop health questions.`;
-      const twPart = `Mewɔ ha sɛ meboa wo aburow yaree ho, adwuma ho, ne nhahan ho nsɛm.`;
+      const twPart = `Mewɔ ha sɛ meboa wo aburo yaree ho, adwuma ho, ne nhahan ho nsɛm.`;
       const dagPart = `N be a n yɛli n-ti a maize kparibɔ, tiŋa, ni kpamli kpɛma.`;
       const body = lang === "tw" ? twPart : lang === "dag" ? dagPart : enPart;
       return `${greeting} ${body}`;
@@ -448,7 +448,7 @@ export default function AgricChatbot({
     }
   };
 
-  // ── TTS: Backend Abena AI first, browser fallback ──
+  // ── TTS: Backend Meta MMS first, browser fallback ──
   const speak = async (text: string, messageIndex?: number) => {
     // Stop any current playback
     if (audioPlayerRef.current) {
@@ -463,7 +463,7 @@ export default function AgricChatbot({
     setCurrentlySpeaking(id);
     setIsPaused(false);
 
-    // Try backend Abena AI first
+    // Try backend Meta MMS first (local, free, supports Twi & Dagbani)
     try {
       const res = await fetch(`${API_BASE}/api/chat/tts`, {
         method: "POST",
@@ -641,10 +641,10 @@ export default function AgricChatbot({
     if (activeLanguage === "tw") {
       if (isHealthy) {
         return [
-          "Dɛn na metumi ayɛ na ama m'aburo ayɛ nea ahoɔden wom?",
-          "Dɛn fertilizer na ɛfata ma maize?",
-          "Mɛtumi adan yaree no ɛkwan bɛn so?",
-          "Mɛsua me nhahan no dɛn bere so?",
+          "Dɛn na metumi ayɛ na ama m'aburo anaa atoko ayɛ nea ahoɔden wom?",
+          "Dɛn fertilizer na ɛfata ma aburo anaa atoko?",
+          "Mɛtumi anya eyi akɔsi bere  bɛn?",
+          "Mɛdua me aburo anaa atoko no dɛn bere so?",
         ];
       }
       if (isDisease) {
@@ -656,10 +656,10 @@ export default function AgricChatbot({
         ];
       }
       return [
-        "Mɛyɛ dɛn ahu aburoo nhahan yareɛ?",
-        "Dɛn fertilizer na ɛfata ma aburoo anaa atoko?",
-        "Mɛtumi adan yaree no ɛkwan bi so?",
-        "Bere bɛn na eye sen biara sɛ wobedua aburoo wɔ Ghana?",
+        "Mɛyɛ dɛn ahu aburo anaa atoko nhahan yaree?",
+        "Dɛn fertilizer na ɛfata ma aburo anaa atoko?",
+        "Mɛtumi adan aburo anaa atoko yaree no ɛkwan bi so?",
+        "Bere bɛn na eye sen biara sɛ wobedua aburo anaa atoko wɔ Ghana?",
       ];
     }
 
@@ -918,7 +918,7 @@ export default function AgricChatbot({
                       </div>
 
                       <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-2">
-                        Premium voices via Abena AI when API key is set.
+                        Meta MMS voices: Twi, Dagbani & English. Runs locally — works offline.
                       </p>
                     </div>
                   )}
@@ -1195,7 +1195,7 @@ export default function AgricChatbot({
                 </button>
               </div>
               <p className="text-xs text-slate-400 dark:text-slate-500 mt-1.5 text-center">
-                AI Agricultural Officer · {LANGUAGE_LABELS[activeLanguage]} · Powered by Groq
+                AI Agricultural Officer · {LANGUAGE_LABELS[activeLanguage]} · Powered by Groq & MMS
               </p>
             </div>
           </div>

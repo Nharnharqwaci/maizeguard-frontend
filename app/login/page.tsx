@@ -1,7 +1,8 @@
 "use client";
 
 import Navbar from "@/components/Navbar";
-import { Eye, EyeOff, XCircle } from "lucide-react";
+import ForgotPasswordModal from "@/components/ForgotPasswordModal";
+import { Eye, EyeOff, XCircle, AlertTriangle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import api from "@/services/api";
@@ -69,6 +70,16 @@ const T: Record<string, Record<Language, string>> = {
     tw: "Bue Account",
     dag: "Kpehi a yuli kpɛlo",
   },
+  forgotPassword: {
+    en: "Forgot password?",
+    tw: "Wo werɛ fi wo paswɛde?",
+    dag: "A yɛnŋa yɛltɔɣ' kpɛma?",
+  },
+  changePassword: {
+    en: "Change Password",
+    tw: "Sesa Wo Paswɛde",
+    dag: "Niŋi sɔŋsim yɛltɔɣ' kpɛma",
+  },
 };
 
 export default function LoginPage() {
@@ -79,8 +90,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [language, setLanguage] = useState<Language>("en");
+  const [showForgotModal, setShowForgotModal] = useState(false);
 
-  // Load language from localStorage on mount
   useEffect(() => {
     const savedLang = localStorage.getItem("chat_language") as Language | null;
     if (savedLang && ["en", "tw", "dag"].includes(savedLang)) {
@@ -120,7 +131,13 @@ export default function LoginPage() {
       localStorage.setItem("user_name", response.data.full_name);
       localStorage.setItem("user_role", response.data.role);
 
-      // Redirect based on role
+      // Check if user must change their temporary password
+      if (response.data.requires_password_change) {
+        router.push("/change-password");
+        return;
+      }
+
+      // Normal redirect based on role
       if (response.data.role === "admin") {
         router.push("/admin");
       } else {
@@ -157,7 +174,6 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Error banner */}
           {error && (
             <div className="mb-5 flex items-start gap-2 p-3 rounded-xl
             bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800
@@ -169,7 +185,6 @@ export default function LoginPage() {
 
           <form className="space-y-5" onSubmit={handleLogin}>
 
-            {/* Phone Number */}
             <div>
               <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                 {t("phoneNumber")}
@@ -183,11 +198,19 @@ export default function LoginPage() {
               />
             </div>
 
-            {/* Password */}
             <div>
-              <label className="block mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                {t("password")}
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  {t("password")}
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowForgotModal(true)}
+                  className="text-xs text-green-600 dark:text-green-400 hover:underline font-medium"
+                >
+                  {t("forgotPassword")}
+                </button>
+              </div>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -224,21 +247,34 @@ export default function LoginPage() {
               )}
             </button>
 
-            <div className="text-center space-y-1">
+            <div className="text-center space-y-2">
               <p className="text-slate-500 dark:text-slate-400 text-sm">
                 {t("noAccount")}
               </p>
               <a
                 href="/register"
-                className="text-green-600 dark:text-green-400 font-semibold hover:underline text-sm"
+                className="text-green-600 dark:text-green-400 font-semibold hover:underline text-sm block"
               >
                 {t("createAccount")}
+              </a>
+              <a
+                href="/change-password"
+                className="text-slate-500 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-400 font-medium hover:underline text-sm block"
+              >
+                {t("changePassword")}
               </a>
             </div>
 
           </form>
         </div>
       </main>
+
+      {showForgotModal && (
+        <ForgotPasswordModal
+          language={language}
+          onClose={() => setShowForgotModal(false)}
+        />
+      )}
     </>
   );
 }
