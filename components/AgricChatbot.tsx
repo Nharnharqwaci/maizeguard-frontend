@@ -52,7 +52,8 @@ interface AgricChatbotProps {
 
 type Language = "en" | "tw" | "dag";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+// FIX #1: Normalize API_BASE to avoid double slashes
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/\/+$/, "");
 
 const LANGUAGE_LABELS: Record<Language, string> = {
   en: "English",
@@ -772,13 +773,15 @@ export default function AgricChatbot({
       {/* Chat window */}
       {open && (
         <div
-          className={`fixed bottom-6 right-6 z-50 max-w-[calc(100vw-2rem)] h-[600px] max-h-[calc(100vh-5rem)] flex rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden bg-white dark:bg-slate-900 transition-all duration-300 ${
-            sidebarOpen && isLoggedIn ? "w-[640px]" : "w-[400px]"
-          }`}
+          className={`fixed bottom-2 right-2 sm:bottom-6 sm:right-6 z-50 flex rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden bg-white dark:bg-slate-900 transition-all duration-300
+            w-[calc(100vw-1rem)] h-[calc(100vh-1rem)]
+            sm:w-[400px] sm:h-[600px] sm:max-w-[calc(100vw-2rem)] sm:max-h-[calc(100vh-5rem)]
+            ${sidebarOpen && isLoggedIn ? "sm:w-[640px]" : ""}
+          `}
         >
           {/* Sidebar */}
           {sidebarOpen && isLoggedIn && (
-            <div className="w-[220px] flex-shrink-0 border-r border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 flex flex-col">
+            <div className="w-full sm:w-[220px] absolute sm:relative z-20 h-full flex-shrink-0 border-r border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 flex flex-col">
               <div className="p-3 flex flex-col gap-1">
                 <button
                   onClick={goHome}
@@ -839,7 +842,7 @@ export default function AgricChatbot({
           )}
 
           {/* Main chat panel */}
-          <div className="flex-1 flex flex-col min-w-0">
+          <div className="flex-1 flex flex-col min-w-0 relative">
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 bg-green-700 dark:bg-green-900 text-white flex-shrink-0">
               <div className="flex items-center gap-2">
