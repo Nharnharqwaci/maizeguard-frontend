@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import type { Viewport } from "next";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -10,6 +11,14 @@ export const metadata: Metadata = {
   description: "AI-powered maize disease detection for farmers",
   manifest: '/manifest.json',
   themeColor: '#000000',
+};
+
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 

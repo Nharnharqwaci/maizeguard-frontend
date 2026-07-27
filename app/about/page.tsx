@@ -8,9 +8,9 @@ type Language = "en" | "tw" | "dag";
 
 const T: Record<string, Record<Language, string>> = {
   heroTitle: {
-    en: "About MaizeAI",
-    tw: "MaizeAI Ho Nsɛm",
-    dag: "MaizeAI Yɛl'",
+    en: "About MaizeGuide",
+    tw: "MaizeGuide Ho Nsɛm",
+    dag: "MaizeGuide Yɛl'",
   },
   heroDesc: {
     en: "Empowering farmers with AI-driven maize disease detection for healthier crops and improved food security.",
@@ -23,9 +23,9 @@ const T: Record<string, Record<Language, string>> = {
     dag: "A Tuhi",
   },
   missionDesc: {
-    en: "MaizeAI aims to provide farmers with an accessible, affordable, and reliable way to detect maize diseases early. By leveraging Artificial Intelligence, the system helps reduce crop losses and supports sustainable agriculture across Ghana and beyond.",
-    tw: "MaizeAI botae ne sɛ ɛbɛma akuafo anya ɔkwan a ɛyɛ mmerɛw, ne bo nyɛ den, na wotumi de ho to so a wɔbɛfa so ahu atoko nyarewa ntɛm. Ɛnam Artificial Intelligence a wɔde di dwuma so no, nhyehyɛe no boa ma nnɔbae a wɔhwere no so tew na ɛboa kuayɛ a ɛbɛkɔ so atra hɔ daa wɔ Ghana nyinaa ne akyirikyiri.",
-    dag: "MaizeAI tuhi n-ti tiŋda kparibɔ maize yɛl' pampam. AI n tiŋa ni kpamli sal' ni tiŋa Ghana ni aman pahi.",
+    en: "MaizeGuide aims to provide farmers with an accessible, affordable, and reliable way to detect maize diseases early. By leveraging Artificial Intelligence, the system helps reduce crop losses and supports sustainable agriculture across Ghana and beyond.",
+    tw: "MaizeGuide botae ne sɛ ɛbɛma akuafo anya ɔkwan a ɛyɛ mmerɛw, ne bo nyɛ den, na wotumi de ho to so a wɔbɛfa so ahu atoko nyarewa ntɛm. Ɛnam Artificial Intelligence a wɔde di dwuma so no, nhyehyɛe no boa ma nnɔbae a wɔhwere no so tew na ɛboa kuayɛ a ɛbɛkɔ so atra hɔ daa wɔ Ghana nyinaa ne akyirikyiri.",
+    dag: "MaizeGuide tuhi n-ti tiŋda kparibɔ maize yɛl' pampam. AI n tiŋa ni kpamli sal' ni tiŋa Ghana ni aman pahi.",
   },
   howItWorksTitle: {
     en: "How It Works",
