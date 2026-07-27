@@ -15,6 +15,9 @@ import {
   Menu,
   X,
   Leaf,
+  Home,
+  BookOpen,
+  Info,
 } from "lucide-react";
 
 type Language = "en" | "tw" | "dag";
@@ -25,7 +28,6 @@ const LANGUAGE_LABELS: Record<Language, string> = {
   dag: "Dagbani",
 };
 
-/* NAVBAR TRANSLATIONS */
 const NAV_T: Record<string, Record<Language, string>> = {
   home: { en: "Home", tw: "Fie", dag: "Yiŋa" },
   treatments: { en: "Treatments", tw: "Ayaresadeɛ", dag: "Tibbu" },
@@ -78,7 +80,6 @@ export default function Navbar({ language = "en", onLanguageChange }: NavbarProp
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Lock body scroll when mobile menu is open
   useEffect(() => {
     if (mobileOpen) {
       document.body.style.overflow = "hidden";
@@ -108,28 +109,24 @@ export default function Navbar({ language = "en", onLanguageChange }: NavbarProp
   const nt = (key: string) => NAV_T[key]?.[language] ?? key;
 
   const links = [
-    { nameKey: "home", href: "/" },
-    { nameKey: "treatments", href: "/treatments" },
-    { nameKey: "about", href: "/about" },
+    { nameKey: "home", href: "/", icon: Home },
+    { nameKey: "treatments", href: "/treatments", icon: BookOpen },
+    { nameKey: "about", href: "/about", icon: Info },
   ];
 
   if (!mounted) {
     return (
       <header className="sticky top-0 z-50 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-        <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
+        <nav className="mx-auto max-w-7xl px-4">
+          <div className="flex h-14 items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-2xl">🌽</span>
-              <div>
-                <h1 className="text-lg font-bold text-green-700 dark:text-green-400 leading-tight">MaizeGuard</h1>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">Smart Crop Diagnosis</p>
-              </div>
+              <span className="text-xl">🌽</span>
+              <span className="text-base font-bold text-green-700 dark:text-green-400">MaizeGuard</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="h-9 w-20 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />
-              <div className="h-9 w-9 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />
-              <div className="h-9 w-24 rounded-xl bg-green-600 animate-pulse" />
-              <div className="h-9 w-20 rounded-xl bg-blue-600 animate-pulse" />
+              <div className="h-9 w-9 rounded-lg bg-slate-100 dark:bg-slate-800 animate-pulse" />
+              <div className="h-9 w-9 rounded-lg bg-slate-100 dark:bg-slate-800 animate-pulse" />
+              <div className="h-9 w-9 rounded-lg bg-slate-100 dark:bg-slate-800 animate-pulse" />
             </div>
           </div>
         </nav>
@@ -146,88 +143,74 @@ export default function Navbar({ language = "en", onLanguageChange }: NavbarProp
             : "bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700"
         }`}
       >
-        <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between gap-4">
+        <nav className="mx-auto max-w-7xl px-3 sm:px-4 lg:px-6">
+          <div className="flex h-14 items-center justify-between gap-2">
 
             {/* ── Logo ── */}
-            <Link href="/" className="flex shrink-0 items-center gap-2">
-              <span className="text-2xl">🌽</span>
-              <div className="hidden sm:block">
-                <h1 className="text-lg font-bold text-green-700 dark:text-green-400 leading-tight">
-                  MaizeGuard
-                </h1>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">
-                  Smart Crop Diagnosis
-                </p>
-              </div>
+            <Link href="/" className="flex shrink-0 items-center gap-1.5">
+              <span className="text-xl shrink-0">🌽</span>
+              <span className="text-base font-bold text-green-700 dark:text-green-400 whitespace-nowrap">
+                MaizeGuard
+              </span>
             </Link>
 
-            {/* ── Desktop Center Links ── */}
-            <div className="hidden md:flex items-center gap-1 lg:gap-2">
+            {/* ── Desktop Links ── */}
+            <div className="hidden md:flex items-center gap-1">
               {links.map((link) => {
                 const active = pathname === link.href;
                 return (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`relative px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`relative rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                       active
                         ? "text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-950"
                         : "text-slate-600 dark:text-slate-300 hover:text-green-700 dark:hover:text-green-400 hover:bg-slate-50 dark:hover:bg-slate-800"
                     }`}
                   >
                     {nt(link.nameKey)}
-                    {active && (
-                      <span className="absolute bottom-1 left-3 right-3 h-0.5 rounded-full bg-green-600 dark:bg-green-400" />
-                    )}
                   </Link>
                 );
               })}
               {loggedIn && (
                 <Link
                   href="/dashboard"
-                  className={`relative px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`relative rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                     pathname === "/dashboard"
                       ? "text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-950"
                       : "text-slate-600 dark:text-slate-300 hover:text-green-700 dark:hover:text-green-400 hover:bg-slate-50 dark:hover:bg-slate-800"
                   }`}
                 >
                   {nt("dashboard")}
-                  {pathname === "/dashboard" && (
-                    <span className="absolute bottom-1 left-3 right-3 h-0.5 rounded-full bg-green-600 dark:bg-green-400" />
-                  )}
                 </Link>
               )}
               {isAdmin && (
                 <Link
                   href="/admin"
-                  className={`relative px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`relative rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                     pathname === "/admin"
                       ? "text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-950"
                       : "text-slate-600 dark:text-slate-300 hover:text-purple-700 dark:hover:text-purple-400 hover:bg-slate-50 dark:hover:bg-slate-800"
                   }`}
                 >
                   {nt("adminPanel")}
-                  {pathname === "/admin" && (
-                    <span className="absolute bottom-1 left-3 right-3 h-0.5 rounded-full bg-purple-600 dark:bg-purple-400" />
-                  )}
                 </Link>
               )}
             </div>
 
-            {/* ── Right Side Actions ── */}
-            <div className="flex items-center gap-2 shrink-0">
+            {/* ── Right Side ── */}
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
 
-              {/* Language — icon only on small screens, text on lg+ */}
+              {/* Language — icon only */}
               <div className="relative" ref={langPickerRef}>
                 <button
                   onClick={() => setShowLangPicker((v) => !v)}
-                  className="flex items-center gap-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 px-2.5 py-2 text-slate-700 dark:text-slate-300 transition-colors hover:bg-slate-200 dark:hover:bg-slate-700"
-                  aria-label="Select language"
+                  className="flex items-center gap-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 p-2 text-slate-700 dark:text-slate-300 transition-colors hover:bg-slate-200 dark:hover:bg-slate-700"
+                  aria-label="Language"
                 >
                   <Globe size={16} />
-                  <span className="hidden lg:inline text-xs font-bold uppercase">{language}</span>
-                  <ChevronDown size={14} className="hidden lg:block" />
+                  <span className="hidden sm:inline text-xs font-bold uppercase">{language}</span>
+                  <ChevronDown size={12} className="hidden sm:block" />
                 </button>
 
                 {showLangPicker && (
@@ -257,55 +240,54 @@ export default function Navbar({ language = "en", onLanguageChange }: NavbarProp
               <button
                 onClick={() => setTheme(isDark ? "light" : "dark")}
                 aria-label="Toggle theme"
-                className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 p-2 text-slate-600 dark:text-slate-300 transition-colors hover:bg-slate-200 dark:hover:bg-slate-700"
+                className="rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 p-2 text-slate-600 dark:text-slate-300 transition-colors hover:bg-slate-200 dark:hover:bg-slate-700"
               >
-                {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                {isDark ? <Sun size={16} /> : <Moon size={16} />}
               </button>
 
-              {/* Analyze Leaf — hidden on small mobile, compact on md */}
+              {/* Analyze Leaf — desktop only */}
               <Link
                 href="/detect"
-                className={`hidden sm:flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-white transition-colors ${
+                className={`hidden md:flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-white transition-colors whitespace-nowrap ${
                   pathname === "/detect" ? "bg-green-700" : "bg-green-600 hover:bg-green-700"
                 }`}
               >
-                <Leaf size={16} className="lg:hidden" />
-                <span className="hidden lg:inline">{nt("analyzeLeaf")}</span>
+                <Leaf size={16} />
+                {nt("analyzeLeaf")}
               </Link>
 
-              {/* Login / Logout — hidden on small mobile */}
+              {/* Login / Logout — desktop only */}
               {loggedIn ? (
                 <button
                   onClick={handleLogout}
-                  className="hidden sm:flex items-center gap-1.5 rounded-xl bg-orange-500 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-600"
+                  className="hidden md:flex items-center gap-1.5 rounded-lg bg-orange-500 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-600 whitespace-nowrap"
                 >
                   <LogOut size={16} />
-                  <span className="hidden lg:inline">{nt("logout")}</span>
+                  {nt("logout")}
                 </button>
               ) : (
                 <Link
                   href="/login"
-                  className="hidden sm:flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                  className="hidden md:flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 whitespace-nowrap"
                 >
-                  <span className="hidden lg:inline">{nt("login")}</span>
-                  <span className="lg:hidden">{nt("login").split(" ")[0]}</span>
+                  {nt("login")}
                 </Link>
               )}
 
-              {/* Mobile hamburger */}
+              {/* Hamburger — mobile only */}
               <button
                 onClick={() => setMobileOpen(true)}
-                className="md:hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 p-2 text-slate-600 dark:text-slate-300 transition-colors hover:bg-slate-200 dark:hover:bg-slate-700"
+                className="md:hidden rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 p-2 text-slate-600 dark:text-slate-300 transition-colors hover:bg-slate-200 dark:hover:bg-slate-700"
                 aria-label="Open menu"
               >
-                <Menu size={20} />
+                <Menu size={18} />
               </button>
             </div>
           </div>
         </nav>
       </header>
 
-      {/* ── Mobile Slide-out Menu ── */}
+      {/* ── Mobile Slide-out Drawer ── */}
       {mobileOpen && (
         <>
           {/* Backdrop */}
@@ -314,10 +296,13 @@ export default function Navbar({ language = "en", onLanguageChange }: NavbarProp
             onClick={() => setMobileOpen(false)}
           />
           {/* Panel */}
-          <div className="fixed inset-y-0 right-0 z-50 w-72 max-w-[85vw] bg-white dark:bg-slate-900 shadow-2xl md:hidden flex flex-col">
-            {/* Panel header */}
+          <div className="fixed inset-y-0 right-0 z-50 w-[280px] max-w-[85vw] bg-white dark:bg-slate-900 shadow-2xl md:hidden flex flex-col">
+            {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 px-5 py-4">
-              <span className="font-bold text-green-700 dark:text-green-400">Menu</span>
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🌽</span>
+                <span className="font-bold text-green-700 dark:text-green-400">Menu</span>
+              </div>
               <button
                 onClick={() => setMobileOpen(false)}
                 className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
@@ -327,9 +312,10 @@ export default function Navbar({ language = "en", onLanguageChange }: NavbarProp
               </button>
             </div>
 
-            {/* Panel links */}
+            {/* Scrollable links */}
             <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1">
               {links.map((link) => {
+                const Icon = link.icon;
                 const active = pathname === link.href;
                 return (
                   <Link
@@ -342,6 +328,7 @@ export default function Navbar({ language = "en", onLanguageChange }: NavbarProp
                         : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                     }`}
                   >
+                    <Icon size={18} />
                     {nt(link.nameKey)}
                   </Link>
                 );
@@ -357,7 +344,7 @@ export default function Navbar({ language = "en", onLanguageChange }: NavbarProp
                       : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                   }`}
                 >
-                  <LayoutDashboard size={16} />
+                  <LayoutDashboard size={18} />
                   {nt("dashboard")}
                 </Link>
               )}
@@ -372,35 +359,31 @@ export default function Navbar({ language = "en", onLanguageChange }: NavbarProp
                       : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                   }`}
                 >
-                  <Crown size={16} />
+                  <Crown size={18} />
                   {nt("adminPanel")}
                 </Link>
               )}
+            </div>
 
-              <div className="my-2 border-t border-slate-200 dark:border-slate-700" />
-
+            {/* Footer actions */}
+            <div className="border-t border-slate-200 dark:border-slate-700 p-4 space-y-2">
               <Link
                 href="/detect"
                 onClick={() => setMobileOpen(false)}
-                className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
-                  pathname === "/detect"
-                    ? "bg-green-600 text-white"
-                    : "bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900"
+                className={`flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-medium text-white transition-colors ${
+                  pathname === "/detect" ? "bg-green-700" : "bg-green-600 hover:bg-green-700"
                 }`}
               >
-                <Leaf size={16} />
+                <Leaf size={18} />
                 {nt("analyzeLeaf")}
               </Link>
-            </div>
 
-            {/* Panel footer */}
-            <div className="border-t border-slate-200 dark:border-slate-700 p-4 space-y-2">
               {loggedIn ? (
                 <button
                   onClick={handleLogout}
-                  className="flex w-full items-center gap-2 rounded-xl bg-orange-500 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-orange-600"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-orange-500 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-orange-600"
                 >
-                  <LogOut size={16} />
+                  <LogOut size={18} />
                   {nt("logout")}
                 </button>
               ) : (
