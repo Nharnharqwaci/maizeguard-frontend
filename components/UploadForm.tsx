@@ -1,6 +1,6 @@
 "use client";
 
-import { Upload, Camera, X } from "lucide-react";
+import { Upload, Camera, X, ImageIcon } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 
 type Language = "en" | "tw" | "dag";
@@ -71,10 +71,10 @@ const T: Record<string, Record<Language, string>> = {
     tw: "Twa Mfonini",
     dag: "Twa Nimli",
   },
-  useButtonsToChange: {
-    en: "Use buttons below to change",
-    tw: "Fa buttons a ɛwɔ aseɛ ha no sesa",
-    dag: "Zaŋ buttons niŋ sɔŋ",
+  removePhoto: {
+    en: "Remove",
+    tw: "Yi",
+    dag: "Yi",
   },
 };
 
@@ -82,6 +82,7 @@ interface UploadFormProps {
   preview: string;
   fileName: string;
   onFileSelect: (file: File) => void;
+  onClear?: () => void;
   language?: Language;
 }
 
@@ -89,6 +90,7 @@ export default function UploadForm({
   preview,
   fileName,
   onFileSelect,
+  onClear,
   language = "en",
 }: UploadFormProps) {
   const uploadRef = useRef<HTMLInputElement | null>(null);
@@ -115,7 +117,6 @@ export default function UploadForm({
 
   const openCamera = async () => {
     if (isMobile) {
-      // on mobile use file input with capture
       const input = document.createElement("input");
       input.type = "file";
       input.accept = "image/*";
@@ -128,7 +129,6 @@ export default function UploadForm({
       return;
     }
 
-    // desktop — use getUserMedia
     setCameraError("");
     setCameraOpen(true);
     try {
@@ -175,10 +175,11 @@ export default function UploadForm({
     }, "image/jpeg", 0.92);
   };
 
-  return (
-    <div className="space-y-3">
+  const hasPreview = !!preview;
 
-      {/* Hidden upload input */}
+  return (
+    <div className="space-y-4">
+      {/* Hidden inputs */}
       <input
         ref={uploadRef}
         type="file"
@@ -186,16 +187,12 @@ export default function UploadForm({
         onChange={handleChange}
         className="sr-only"
       />
-
-      {/* Hidden canvas for photo capture */}
       <canvas ref={canvasRef} className="hidden" />
 
-      {/* Camera modal */}
+      {/* ── CAMERA MODAL ── */}
       {cameraOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden w-full max-w-2xl shadow-2xl">
-
-            {/* Modal header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-700">
               <h3 className="font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                 <Camera size={18} className="text-green-600" />
@@ -209,7 +206,6 @@ export default function UploadForm({
               </button>
             </div>
 
-            {/* Camera error */}
             {cameraError ? (
               <div className="p-6 text-center">
                 <p className="text-red-500 text-sm mb-4">{cameraError}</p>
@@ -222,7 +218,6 @@ export default function UploadForm({
               </div>
             ) : (
               <>
-                {/* Video feed */}
                 <div className="relative bg-black">
                   <video
                     ref={videoRef}
@@ -232,8 +227,6 @@ export default function UploadForm({
                     className="w-full max-h-96 object-contain"
                   />
                 </div>
-
-                {/* Capture button */}
                 <div className="flex justify-center gap-4 p-5">
                   <button
                     onClick={closeCamera}
@@ -255,62 +248,97 @@ export default function UploadForm({
         </div>
       )}
 
-      {/* Preview box */}
-      <div className="relative border-2 border-dashed border-green-400 dark:border-green-600 rounded-xl overflow-hidden h-72 transition hover:border-green-600 dark:hover:border-green-400">
-        {preview ? (
-          <div className="relative h-full">
-            <img
-              src={preview}
-              alt="Selected leaf"
-              className="w-full h-full object-contain bg-slate-50 dark:bg-slate-800"
-            />
-            <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white p-3 flex items-center justify-between">
-              <p className="font-medium text-sm truncate">{fileName}</p>
-              <span className="text-xs opacity-70 ml-2">
-                {t("useButtonsToChange")}
-              </span>
+      {/* ── PREVIEW / DROPZONE ── */}
+      <div
+        className={`relative rounded-2xl overflow-hidden transition-all duration-300
+          ${hasPreview
+            ? "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm"
+            : "bg-slate-50 dark:bg-slate-900/50 border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-green-400 dark:hover:border-green-500 hover:bg-green-50/30 dark:hover:bg-green-950/20"
+          }
+        `}
+      >
+        {hasPreview ? (
+          /* ── IMAGE PREVIEW STATE ── */
+          <div className="relative group">
+            {/* Image fills width, capped height, no awkward whitespace */}
+            <div className="w-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+              <img
+                src={preview}
+                alt="Selected leaf"
+                className="w-full max-h-80 object-contain"
+              />
+            </div>
+
+            {/* Top-right remove button */}
+            {onClear && (
+              <button
+                onClick={onClear}
+                className="absolute top-3 right-3 w-9 h-9 bg-white/90 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-full flex items-center justify-center transition-all shadow-md hover:shadow-lg backdrop-blur-sm border border-slate-200 dark:border-slate-600"
+                title={t("removePhoto")}
+              >
+                <X size={16} />
+              </button>
+            )}
+
+            {/* Bottom info bar — clean, minimal */}
+            <div className="absolute bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border-t border-slate-200 dark:border-slate-700 px-4 py-2.5">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <ImageIcon size={14} className="text-green-600 dark:text-green-400 flex-shrink-0" />
+                  <p className="text-sm text-slate-700 dark:text-slate-200 font-medium truncate">
+                    {fileName}
+                  </p>
+                </div>
+                <span className="text-xs text-slate-400 dark:text-slate-500 flex-shrink-0 hidden sm:inline">
+                  Ready to analyze
+                </span>
+              </div>
             </div>
           </div>
         ) : (
-          <div className="h-full flex flex-col items-center justify-center bg-green-50 dark:bg-green-950 p-6 text-center">
-            <div className="flex gap-4 mb-4">
-              <Upload size={36} className="text-green-500" />
-              <Camera size={36} className="text-green-600" />
+          /* ── EMPTY / DROPZONE STATE ── */
+          <button
+            onClick={() => uploadRef.current?.click()}
+            className="w-full py-14 px-6 flex flex-col items-center justify-center gap-3 cursor-pointer"
+          >
+            <div className="w-16 h-16 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-1">
+              <div className="flex gap-3">
+                <Upload size={24} className="text-green-600 dark:text-green-400" />
+                <Camera size={24} className="text-green-600 dark:text-green-400" />
+              </div>
             </div>
-            <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
-              {t("uploadOrTakePhoto")}
-            </h2>
-            <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
-              {t("supportedFormats")}
-            </p>
-            <p className="text-green-700 dark:text-green-400 mt-1 text-sm font-medium">
-              {t("useButtonsBelow")}
-            </p>
-          </div>
+            <div className="text-center">
+              <p className="text-base font-semibold text-slate-800 dark:text-slate-100">
+                {t("uploadOrTakePhoto")}
+              </p>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                {t("supportedFormats")}
+              </p>
+            </div>
+          </button>
         )}
       </div>
 
-      {/* Action buttons */}
+      {/* ── ACTION BUTTONS ── */}
       <div className="grid grid-cols-2 gap-3">
         <button
           type="button"
           onClick={() => uploadRef.current?.click()}
-          className="flex items-center justify-center gap-2 border-2 border-green-500 dark:border-green-600 text-green-700 dark:text-green-400 py-3 rounded-xl font-semibold hover:bg-green-50 dark:hover:bg-green-950 transition text-sm"
+          className="flex items-center justify-center gap-2 border-2 border-green-600 dark:border-green-500 text-green-700 dark:text-green-400 py-3 rounded-xl font-semibold hover:bg-green-50 dark:hover:bg-green-950/30 transition text-sm"
         >
           <Upload size={17} />
-          {preview ? t("changePhoto") : t("uploadPhoto")}
+          {hasPreview ? t("changePhoto") : t("uploadPhoto")}
         </button>
 
         <button
           type="button"
           onClick={openCamera}
-          className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold transition text-sm"
+          className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold transition text-sm shadow-sm hover:shadow-md"
         >
           <Camera size={17} />
-          {preview ? t("retakePhoto") : t("takePhotoBtn")}
+          {hasPreview ? t("retakePhoto") : t("takePhotoBtn")}
         </button>
       </div>
-
     </div>
   );
 }

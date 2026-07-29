@@ -21,6 +21,13 @@ import {
   ExternalLink,
 } from "lucide-react";
 import api from "@/services/api";
+import { loadModel, runInference } from "@/services/inference";
+import {
+  getTreatment,
+  getSeverity,
+  getColor,
+  computeNormalizedEntropy,
+} from "@/data/treatments";
 
 type Language = "en" | "tw" | "dag";
 
@@ -332,7 +339,7 @@ function YouTubeEmbed({
   const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1`;
 
   return (
-    <div className=" relative aspect-video w-full overflow-hidden rounded-xl">
+    <div className="relative aspect-video w-full overflow-hidden rounded-xl">
       {playing ? (
         <iframe
           src={embedUrl}
@@ -402,6 +409,7 @@ export default function DetectPage() {
   const [videosOpen, setVideosOpen] = useState(true);
   const [probsOpen, setProbsOpen] = useState(true);
   const [language, setLanguage] = useState<Language>("en");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // Load language from localStorage on mount
   useEffect(() => {
@@ -419,6 +427,49 @@ export default function DetectPage() {
     window.addEventListener("storage", handleStorage);
     return () => window.removeEventListener("storage", handleStorage);
   }, []);
+
+  // Check login status on mount
+  useEffect(() => {
+    setIsLoggedIn(!!localStorage.getItem("token"));
+  }, []);
+
+  // Preload the ONNX model as soon as the page mounts
+  useEffect(() => {
+    loadModel().catch(console.error);
+  }, []);
+
+  // ── RE-TRANSLATE TREATMENT + REFETCH VIDEOS WHEN LANGUAGE CHANGES ──
+  useEffect(() => {
+    if (!result) return;
+
+    // 1. Update treatment immediately using local data (works offline)
+    setResult((prev) =>
+      prev
+        ? {
+            ...prev,
+            treatment: getTreatment(prev.prediction, language),
+          }
+        : null
+    );
+
+    // 2. Best-effort refetch videos in new language
+    api
+      .get(`/api/videos?prediction=${result.prediction}&lang=${language}`)
+      .then((res) => {
+        setResult((prev) =>
+          prev
+            ? {
+                ...prev,
+                videos: res.data.videos || [],
+              }
+            : null
+        );
+      })
+      .catch(() => {
+        // Silently fail — keep existing videos
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [language]);
 
   const t = (key: string) => T[key]?.[language] ?? key;
 
@@ -439,29 +490,111 @@ export default function DetectPage() {
       setIsNetworkError(false);
       setVideosOpen(true);
       setProbsOpen(true);
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("lang", language);
-      const token = localStorage.getItem("token");
 
-      const headers: Record<string, string> = {};
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
+      // 1. LOCAL INFERENCE (OFFLINE!)
+      const inference = await runInference(file);
+
+      // 2. Post-process
+      const CONFIDENCE_THRESHOLD = 70.0;
+      const ENTROPY_THRESHOLD = 0.5;
+
+      let prediction: string = inference.prediction;
+      let confidence = inference.confidence;
+      const all_probs = inference.all_probs;
+      const entropy = computeNormalizedEntropy(all_probs);
+
+      const validClasses = [
+        "Common_Rust",
+        "Gray_Leaf_Spot",
+        "Healthy",
+        "MSV",
+        "Northern_Leaf_Blight",
+        "Southern_Leaf_Blight",
+      ];
+
+      if (
+        !validClasses.includes(prediction) ||
+        confidence < CONFIDENCE_THRESHOLD ||
+        entropy > ENTROPY_THRESHOLD
+      ) {
+        prediction = "Uncertain";
       }
-      const response = await api.post("/api/predict", formData, {
-        headers,
-      });
-      setResult(response.data);
-    } catch (err: any) {
+
+      const treatment = getTreatment(prediction, language);
+      const severity = getSeverity(prediction);
+      const color = getColor(prediction);
+
+      // 3. Show result immediately
+      const localResult: ScanResult = {
+        id: "local-" + Date.now(),
+        prediction,
+        confidence,
+        severity,
+        color,
+        treatment,
+        save_status: "guest",
+        videos: [],
+        saved: false,
+        all_probs,
+      };
+      setResult(localResult);
+
+      // 4. Best-effort: save scan (optional) and fetch videos (independent)
+      let saved = false;
+      let scanId = localResult.id;
+      let videos: VideoItem[] = [];
+
+      // 4a. Save to history (don't let failure block videos)
+      try {
+        const token = localStorage.getItem("token");
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("lang", language);
+        formData.append("prediction", prediction);
+        formData.append("confidence", confidence.toString());
+        formData.append("severity", severity);
+
+        const headers: Record<string, string> = {};
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+
+        const saveRes = await api.post("/api/save-scan", formData, { headers });
+        saved = saveRes.data.saved;
+        scanId = saveRes.data.scan_id || scanId;
+        // If save succeeded and returned videos, use those
+        if (saveRes.data.videos && saveRes.data.videos.length > 0) {
+          videos = saveRes.data.videos;
+        }
+      } catch {
+        console.log("Save scan failed — continuing as guest");
+      }
+
+      // 4b. Fetch videos independently (if not already got from save-scan)
+      if (videos.length === 0) {
+        try {
+          const videosRes = await api.get(
+            `/api/videos?prediction=${prediction}&lang=${language}`
+          );
+          videos = videosRes.data.videos || [];
+        } catch {
+          console.log("Fetch videos failed — no videos to display");
+        }
+      }
+
+      setResult((prev) =>
+        prev
+          ? {
+              ...prev,
+              id: scanId,
+              save_status: saved ? "saved" : "guest",
+              saved,
+              videos,
+            }
+          : null
+      );
+    } catch (err) {
+      console.log("Backend offline — showing local result only");
       console.error(err);
-      if (!err?.response) {
-        setIsNetworkError(true);
-        setError(T.networkError[language]);
-      } else {
-        setError(
-          err?.response?.data?.detail || T.analyzeError[language]
-        );
-      }
+      setError(T.analyzeError[language]);
     } finally {
       setLoading(false);
     }
@@ -482,7 +615,6 @@ export default function DetectPage() {
     ? predictionConfig[result.prediction] ?? defaultConfig
     : defaultConfig;
 
-  // Get translated label for the prediction
   const getPredictionLabel = (prediction: string) => {
     const cfg = predictionConfig[prediction];
     if (cfg) {
@@ -491,7 +623,6 @@ export default function DetectPage() {
     return prediction.replace(/_/g, " ");
   };
 
-  // Get treatment section title based on prediction
   const getTreatmentTitle = () => {
     if (!result) return "";
     if (result.prediction === "Uncertain") return t("recommendations");
@@ -526,6 +657,7 @@ export default function DetectPage() {
             <UploadForm
               preview={preview}
               fileName={fileName}
+              onClear={handleReset}
               onFileSelect={handleFileSelect}
               language={language}
             />
@@ -587,13 +719,13 @@ export default function DetectPage() {
                     {t("analysisResult")}
                   </h2>
                 </div>
-                {result.save_status === "saved" && (
+                {isLoggedIn && result.save_status === "saved" && (
                   <div className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-500 bg-green-50 dark:bg-green-950 px-3 py-1.5 rounded-lg">
                     <CheckCircle size={12} />
                     {t("savedHistory")}
                   </div>
                 )}
-                {result.save_status === "offline" && (
+                {isLoggedIn && result.save_status === "offline" && (
                   <div className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg">
                     <WifiOff size={12} />
                     {t("notSavedOffline")}
@@ -636,47 +768,6 @@ export default function DetectPage() {
                 </div>
               </div>
 
-              {/* Class probabilities — collapsible */}
-              {result.prediction !== "Uncertain" && result.all_probs && Object.keys(result.all_probs).length > 0 && (
-                <div className="mb-6 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden">
-                  <button
-                    onClick={() => setProbsOpen(!probsOpen)}
-                    className="w-full flex items-center justify-between px-5 py-4 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-750 transition-colors"
-                  >
-                    <span className="text-sm font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                      {t("classProbabilities")}
-                    </span>
-                    {probsOpen
-                      ? <ChevronUp size={18} className="text-slate-400" />
-                      : <ChevronDown size={18} className="text-slate-400" />
-                    }
-                  </button>
-                  {probsOpen && (
-                    <div className="px-5 py-4 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
-                      <div className="space-y-3">
-                        {Object.entries(result.all_probs)
-                          .sort(([, a], [, b]) => (b as number) - (a as number))
-                          .map(([cls, prob]) => (
-                            <div key={cls} className="flex items-center gap-3">
-                              <span className="text-sm text-slate-700 dark:text-slate-300 w-44 shrink-0 font-medium">
-                                {getPredictionLabel(cls)}
-                              </span>
-                              <div className="flex-1 bg-white dark:bg-slate-700 rounded-full h-2.5 border border-slate-200 dark:border-slate-600">
-                                <div
-                                  className={`h-2.5 rounded-full transition-all duration-700 ${probBarColor[cls] ?? "bg-slate-400"}`}
-                                  style={{ width: `${prob}%` }}
-                                />
-                              </div>
-                              <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 w-14 text-right">
-                                {(prob as number).toFixed(1)}%
-                              </span>
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
 
               {/* Treatment recommendations */}
               {result.treatment && result.treatment.length > 0 && (
@@ -699,10 +790,9 @@ export default function DetectPage() {
                 </div>
               )}
 
-              {/* YouTube Videos — collapsible */}
+              {/* YouTube Videos */}
               {result.videos && result.videos.length > 0 && (
                 <div className="mb-8 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden">
-                  {/* Collapsible header */}
                   <button
                     onClick={() => setVideosOpen(!videosOpen)}
                     className="w-full flex items-center justify-between px-5 py-4 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-750 transition-colors"
@@ -725,7 +815,6 @@ export default function DetectPage() {
                     }
                   </button>
 
-                  {/* Collapsible content */}
                   {videosOpen && (
                     <div className="p-5 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
                       <div className="grid sm:grid-cols-2 gap-3">
@@ -740,7 +829,6 @@ export default function DetectPage() {
                           />
                         ))}
                       </div>
-                      {/* offline hint */}
                       <p className="mt-3 text-xs text-slate-400 dark:text-slate-500 text-center">
                         {t("videosRequireInternet")}
                       </p>

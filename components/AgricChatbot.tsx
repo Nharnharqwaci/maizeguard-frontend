@@ -52,7 +52,6 @@ interface AgricChatbotProps {
 
 type Language = "en" | "tw" | "dag";
 
-// FIX #1: Normalize API_BASE to avoid double slashes
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/\/+$/, "");
 
 const LANGUAGE_LABELS: Record<Language, string> = {
@@ -95,7 +94,7 @@ export default function AgricChatbot({
   const audioChunksRef = useRef<Blob[]>([]);
   const recordingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // TTS states - backend Meta MMS + browser fallback
+  // TTS states
   const [showTtsSettings, setShowTtsSettings] = useState(false);
   const [ttsSpeed, setTtsSpeed] = useState(1.0);
   const [ttsVoice, setTtsVoice] = useState<string>("default");
@@ -142,7 +141,6 @@ export default function AgricChatbot({
     }
   }, []);
 
-  // Load browser voices for fallback TTS
   useEffect(() => {
     if (typeof window === "undefined" || !window.speechSynthesis) return;
     const loadVoices = () => {
@@ -449,9 +447,8 @@ export default function AgricChatbot({
     }
   };
 
-  // ── TTS: Backend Meta MMS first, browser fallback ──
+  // ── TTS: Backend first, browser fallback ──
   const speak = async (text: string, messageIndex?: number) => {
-    // Stop any current playback
     if (audioPlayerRef.current) {
       audioPlayerRef.current.pause();
       audioPlayerRef.current = null;
@@ -464,7 +461,6 @@ export default function AgricChatbot({
     setCurrentlySpeaking(id);
     setIsPaused(false);
 
-    // Try backend Meta MMS first (local, free, supports Twi & Dagbani)
     try {
       const res = await fetch(`${API_BASE}/api/chat/tts`, {
         method: "POST",
@@ -607,7 +603,7 @@ export default function AgricChatbot({
   const goHome = async () => {
     setSidebarOpen(false);
     setHistoryLoading(true);
-    await loadSession(null);
+        await loadSession(null);
     setHistoryLoading(false);
   };
 
@@ -636,7 +632,7 @@ export default function AgricChatbot({
     });
   };
 
-   const suggestedQuestions = (() => {
+  const suggestedQuestions = (() => {
     const diseaseName = prediction ? prediction.replace(/_/g, " ") : "";
 
     if (activeLanguage === "tw") {
@@ -644,7 +640,7 @@ export default function AgricChatbot({
         return [
           "Dɛn na metumi ayɛ na ama m'aburo anaa atoko ayɛ nea ahoɔden wom?",
           "Dɛn fertilizer na ɛfata ma aburo anaa atoko?",
-          "Mɛtumi anya eyi akɔsi bere  bɛn?",
+          "Mɛtumi anya eyi akɔsi bere bɛn?",
           "Mɛdua me aburo anaa atoko no dɛn bere so?",
         ];
       }
@@ -713,6 +709,7 @@ export default function AgricChatbot({
       "When is the best time to plant maize in Ghana?",
     ];
   })();
+
   const initials = userName
     ? userName
         .split(" ")

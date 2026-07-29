@@ -2,6 +2,15 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+html.font-small  { font-size: 87.5%; }
+html.font-normal { font-size: 100%; }
+html.font-large  { font-size: 112.5%; }
+html.font-xl     { font-size: 125%; }
+
+html, body {
+  transition: font-size 0.2s ease;
+}
+
 html {
   scroll-behavior: smooth;
 }

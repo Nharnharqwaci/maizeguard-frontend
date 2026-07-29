@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
+import { FontSizeToggle, FontSizePicker } from "@/components/FontSizeToggle";
 import { useTheme } from "next-themes";
 import {
   Sun,
@@ -127,6 +128,7 @@ export default function Navbar({ language = "en", onLanguageChange }: NavbarProp
               <div className="h-9 w-9 rounded-lg bg-slate-100 dark:bg-slate-800 animate-pulse" />
               <div className="h-9 w-9 rounded-lg bg-slate-100 dark:bg-slate-800 animate-pulse" />
               <div className="h-9 w-9 rounded-lg bg-slate-100 dark:bg-slate-800 animate-pulse" />
+              <div className="h-9 w-9 rounded-lg bg-slate-100 dark:bg-slate-800 animate-pulse" />
             </div>
           </div>
         </nav>
@@ -200,6 +202,9 @@ export default function Navbar({ language = "en", onLanguageChange }: NavbarProp
 
             {/* ── Right Side ── */}
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+
+              {/* Font Size Toggle */}
+              <FontSizeToggle />
 
               {/* Language — icon only */}
               <div className="relative" ref={langPickerRef}>
@@ -366,7 +371,13 @@ export default function Navbar({ language = "en", onLanguageChange }: NavbarProp
             </div>
 
             {/* Footer actions */}
-            <div className="border-t border-slate-200 dark:border-slate-700 p-4 space-y-2">
+            <div className="border-t border-slate-200 dark:border-slate-700 p-4 space-y-3">
+              {/* Font Size Picker in drawer */}
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-600 dark:text-slate-300">Text Size</span>
+                <FontSizePicker />
+              </div>
+
               <Link
                 href="/detect"
                 onClick={() => setMobileOpen(false)}

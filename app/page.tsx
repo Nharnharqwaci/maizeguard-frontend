@@ -56,9 +56,9 @@ const T: Record<string, Record<Language, string>> = {
     dag: "Kyaŋsim",
   },
   diseasesTitle: {
-    en: "Diseases We Detect",
-    tw: "Nyarewa a Yehu",
-    dag: "Yɛl' Shɛli din Kparibɔ",
+    en: "Conditions We Detect",
+    tw: "Tebea a Yehunu",
+    dag: "Biɛhigu ti ni nyɛra",
   },
   diseasesSubtitle: {
     en: "Our AI model is trained to identify 6 maize leaf conditions.",
