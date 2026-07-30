@@ -97,44 +97,44 @@ const diseasesData: Record<Language, { name: string; description: string }[]> = 
   ],
   tw: [
     {
-      name: "Common Rust",
+      name: "Aburoo mfofoeeɛ",
       description:
         "Nsuo a ɛyɛ borɔdɔma-kɔkɔɔ a ɛwɔ nhaban ani a Puccinia sorghi de ba. Ɛtrɛw ntɛm wɔ bepow a ɛyɛ dinn mu.",
     },
     {
-      name: "Gray Leaf Spot",
+      name: "Ahaban nkaeɛ kɔkɔbiri",
       description:
         "Akuru a ɛyɛ ahinanan a ɛyɛ fitaa a ɛyɛ tan a ɛwɔ nhaban ntini ntam. Cercospora zeae-maydis na ɛde ba. Ɛyɛ yie wɔ wim tebea a ɛyɛ hyew a ɛyɛ nwini mu.",
     },
     {
-      name: "Apɔwmuden Nhahan",
+      name: "Apɔwmuden Nhaban",
       description:
         "Kɔla a ɛyɛ ahabammono a emu dɔ yɛ pɛ, dua a ɛyɛ den, nsensanee anaa nsensanee biara nni mu. Kɔ so hwɛ so daa na fa nyinsɛn gu so.",
     },
     {
-      name: "MSV — Maize Streak Virus",
+      name: "Ahaban nsensaneeɛ",
       description:
         "Ntrɛwmu kɔkɔɔ anaa mosaic nsusuwso wɔ nhaban so. Viral — a nhaban a wɔfrɛ no leafhoppers na ɛtrɛw. Aduru biara nni hɔ; fa w’adwene si yare no ano a wosiw ne mmoawa a wɔde nyarewa ba so.",
     },
     {
-      name: "Northern Leaf Blight",
+      name: "Ahaban hyeeɛ kɛseɛ",
       description:
         "Akuru atenten a ɛte sɛ sigaret a ɛyɛ tan. Exserohilum turcicum na ɛde ba. Ɔhyew a ɛkɔ fam ne nhaban a ɛyɛ nwini na ɛyɛ nea wɔpɛ.",
     },
     {
-      name: "Southern Leaf Blight",
+      name: "Ahaban hyeeɛ nketewa",
       description:
         "Akuru nketenkete a ɛyɛ tan a ɛwɔ hye a ɛyɛ bruu a ɛkata ahaban no so. Cochliobolus heterostrophus na ɛde ba. Aniberesɛm wɔ mmeae a ɛhɔ yɛ hyew a ɛhɔ yɛ nwini.",
     },
   ],
   dag: [
     {
-      name: "Common Rust",
+      name: "Kanyanga bimbila",
       description:
         "Orange-red pustules kpamli mmienu so. Puccinia sorghi na ɛde ba. Ɛtrɛw pampam wɔ bepow saŋa.",
     },
     {
-      name: "Gray Leaf Spot",
+      name: "Ahaban nkaeɛ kɔkɔbiri",
       description:
         "Gray-tan lesions rectangular, kpamli ntini ntam. Cercospora zeae-maydis na ɛde ba. Ɛyɛ den wɔ bepow hyew saŋa.",
     },
@@ -144,17 +144,17 @@ const diseasesData: Record<Language, { name: string; description: string }[]> = 
         "Green pɛpɛɛpɛ, dua den, kuɣu biɛla. Kpɛma kpamli ni tiŋa.",
     },
     {
-      name: "MSV — Maize Streak Virus",
+      name: "Kanyanga vari ninsalininsali",
       description:
         "Yellow streaks bee mosaic patterns kpamli so. Virus, leafhoppers na ɛde trɛw. Kyaŋsim n-yɛn; kparibɔ leafhoppers.",
     },
     {
-      name: "Northern Leaf Blight",
+      name: "Kanyanga vari kuunli titali",
       description:
         "Tan lesions tenten sɛ cigar. Exserohilum turcicum na ɛde ba. Ɛyɛ den wɔ mpepepamu ni kpamli nwini saŋa.",
     },
     {
-      name: "Southern Leaf Blight",
+      name: "Kanyanga vari kuunli bihi",
       description:
         "Tan lesions kakraba, brown nkyɛn, ɛkata kpamli so. Cochliobolus heterostrophus na ɛde ba. Ɛyɛ den wɔ bepow hyew saŋa.",
     },
@@ -226,14 +226,14 @@ const treatmentsData: Record<Language, { tag: string; title: string; description
   ],
   tw: [
     {
-      tag: "Common Rust",
-      title: "Sɛnea Wobɛsa Common Rust",
+      tag: "Aburoo mfofoeeɛ",
+      title: "Sɛnea Wobɛsa Aburoo mfofoeeɛ",
       description:
         "Fa fungicides a ɛwɔ azoxystrobin, propiconazole, anaa mancozeb gu sɛ yaree no fii ase. Yi na sɛɛ nhahan a yaree no ahyɛ mu den. Dua nhahan a yaree ntumi nka no afe a ɛbɛba. Nnua aburow ansa na woanntwa dua foforo biara.",
     },
     {
-      tag: "Gray Leaf Spot",
-      title: "Sɛnea Wobɛsa Gray Leaf Spot",
+      tag: "Ahaban nkaeɛ kɔkɔbiri",
+      title: "Sɛnea Wobɛsa Ahaban nkaeɛ kɔkɔbiri",
       description:
         "Fa strobilurin anaa triazole nnuru a ekum fungi gu so ntɛm. Ma nsuo a ɛkɔ mu no tu mpɔn na trɛw afifideɛ ntam kwan mu na ama nsuo a ɛyɛ nwini no so ate. Till nnɔbae nkae bere a wɔatwa akyi de asɛe spores a ɛtra awɔw bere mu. Fa soyabeans, asase so nnuadewa, anaa cowpea di akɔneaba anyɛ yiye koraa no bere biako.",
     },
@@ -244,20 +244,20 @@ const treatmentsData: Record<Language, { tag: string; title: string; description
         "Hwɛ mfuw so nnafua 7 biara. Fa NPK aduannuru gu so wɔ 60-40-40 kg/ha mfiase. Fa afifideɛ a ɛwɔ 75cm ntam wɔ ntoatoasoɔ ntam ne 25cm wɔ ntoatoasoɔ mu. Ngugu so nsu wɔ afifide ase — kwati sɛ wobɛma nhaban ayɛ nsu. Ma mfuw mu nwura a ɛgye mmoawa a wɔsɛe nnɔbae no nni mu.",
     },
     {
-      tag: "MSV",
-      title: "Sɛnea Wobɛdi MSV So",
+      tag: "Ahaban nsensaneeɛ",
+      title: "Sɛnea Wobɛdi Ahaban nsensaneeɛ So",
       description:
         "Yi nnɔbae a wɔyare no wom no fi hɔ na sɛe no ntɛm ara. Fa imidacloprid anaa thiamethoxam di nhaban a wɔfrɛ no leafhoppers so. Fa nnua a ɛma nhaban a ɛma hann no dannan gu so na ama wɔatumi asiw nhaban a wɔsɛe nnɔbae no kwan. Dua ahorow a ɛko tia MSV wɔ bere a edi hɔ no mu (sɛ nhwɛso no SAMMAZ 14, 15). Fa ɔyare mmoawa dodow a ɛkɔ soro ho amanneɛ kyerɛ wo kuayɛ ntrɛwmu sohwɛfo.",
     },
     {
-      tag: "Northern Leaf Blight",
-      title: "Sɛnea Wobɛsa Northern Leaf Blight",
+      tag: "Ahaban hyeeɛ kɛseɛ",
+      title: "Sɛnea Wobɛsa Ahaban hyeeɛ kɛseɛ",
       description:
         "Fa propiconazole, azoxystrobin, anaa pyraclostrobin nnuru a ekum fungi gu so wɔ sɛnkyerɛnne no mfiase. Yi nhahan a ɛwɔ fam a wɔyare no wom no yie. Trɛw nnɔbae ntam kwan mu na ama mframa a ɛkɔ mu no akɔ soro. Sie anaa hyew nnɔbae nkae bere a woatwa awie no. Dua afrafra a ɛko tia nnɔbae wɔ bere a edi hɔ no mu.",
     },
     {
-      tag: "Southern Leaf Blight",
-      title: "Sɛnea Wobɛsa Southern Leaf Blight",
+      tag: "Ahaban hyeeɛ nketewa",
+      title: "Sɛnea Wobɛsa Ahaban hyeeɛ nketewa",
       description:
         "Fa strobilurin anaa triazole nnuru a ekum fungi gu so ntɛm ara. Yi na hyew nhahan a asɛe kɛse — nnyɛ compost. Hwɛ hu sɛ wubenya potassium aduan pa. Tu mpɔn wɔ nsu a ɛkɔ mu no mu na trɛw ntam kwan no mu. Fa legumes di akɔneaba bere biako kosi abien. Fa aba a wɔagye atom sɛ yare biara nni mu di dwuma wɔ dua a edi hɔ no mu.",
     },
@@ -288,14 +288,14 @@ const treatmentsData: Record<Language, { tag: string; title: string; description
   ],
   dag: [
     {
-      tag: "Common Rust",
-      title: "Kyaŋsim Common Rust",
+      tag: "Kanyanga bimbila",
+      title: "Kyaŋsim Kanyanga bimbila",
       description:
         "Zaŋ fungicides din wɔ azoxystrobin, propiconazole, bee mancozeb yɛl' fii ase. Yi ni sɛɛ kpamli din yɛl' ahyɛ mu. Dua kpamli din yɛl' kuɣu biɛla afe din daa. Nnua maize yɛl' pahi.",
     },
     {
-      tag: "Gray Leaf Spot",
-      title: "Kyaŋsim Gray Leaf Spot",
+      tag: "Kanyanga vari daŋ sabila",
+      title: "Kyaŋsim Kanyanga vari daŋ sabila",
       description:
         "Zaŋ strobilurin bee triazole fungicides pampam. Siesie nsu kwan ni twe nnua ntam. Twaa nnɔbae a atwa ni spores bɛwu. Dua beans, groundnuts, bee cowpea.",
     },
@@ -306,20 +306,20 @@ const treatmentsData: Record<Language, { tag: string; title: string; description
         "Kpɛma nnɔbae nnawɔtwe biara. Zaŋ NPK fertilizer 60-40-40 kg/ha. Twe nnua ntam: 75cm wɔ ntwɛtwɛn ntam ni 25cm wɔ nnua ntam. Tɔ nsu dua ase — nhwɛ kpamli so. Yi nwura.",
     },
     {
-      tag: "MSV",
-      title: "Di MSV So",
+      tag: "Kanyanga vari ninsalininsali",
+      title: "Di Kanyanga vari ninsalininsali So",
       description:
         "Yi ni sɛɛ nnɔbae a yɛl' ahyɛ mu pampam. Kparibɔ leafhoppers ni imidacloprid bee thiamethoxam. Zaŋ mulches ni leafhoppers bɛsan. Dua MSV-resistant afe din daa (SAMMAZ 14, 15). Kɔ ka kyerɛ agricultural officer.",
     },
     {
-      tag: "Northern Leaf Blight",
-      title: "Kyaŋsim Northern Leaf Blight",
+      tag: "Kanyanga vari kuunli titali",
+      title: "Kyaŋsim Kanyanga vari kuunli titali",
       description:
         "Zaŋ propiconazole, azoxystrobin, bee pyraclostrobin fungicides yɛl' fii ase. Yi kpamli a ɛwɔ ase no yie. Twe nnua ntam ni mframa ntu. Siesie bee hyɛ nnɔbae a atwa. Dua kpamli a yɛl' kuɣu biɛla afe din daa.",
     },
     {
-      tag: "Southern Leaf Blight",
-      title: "Kyaŋsim Southern Leaf Blight",
+      tag: "Kanyanga vari kuunli bihi",
+      title: "Kyaŋsim Kanyanga vari kuunli bihi",
       description:
         "Zaŋ strobilurin bee triazole fungicides pampam. Yi ni hyɛ kpamli a yɛl' ahyɛ mu den — nnyɛ compost. Hwɛ sɛ potassium wɔ hɔ. Siesie nsu kwan ni twe nnua ntam. Dua legumes bere biara bee mmienu. Fa seed a yɛl' n-nya biɛla dua afe din daa.",
     },

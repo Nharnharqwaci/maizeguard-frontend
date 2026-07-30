@@ -134,7 +134,7 @@ const T: Record<string, Record<Language, string>> = {
   },
   videosRequireInternet: {
     en: "Videos require an active internet connection to play. Click the thumbnail to load the player.",
-    tw: "Video no hia internet na ɛbɛbɔ. Klik thumbnail no na load player no.",
+    tw: "Video no hia internet na ɛbɛbɔ. Klik so na load player no.",
     dag: "Video nima internet pampam ni bɔ. Click thumbnail ni load player.",
   },
   scanAnother: {
@@ -149,28 +149,28 @@ const T: Record<string, Record<Language, string>> = {
   },
   msv: {
     en: "Maize Streak Virus (MSV)",
-    tw: "Maize Streak Virus (MSV)",
-    dag: "Maize Streak Virus (MSV)",
+    tw: "Ahaban nsensaneeɛ",
+    dag: "Kanyanga vari ninsalininsali",
   },
   commonRust: {
     en: "Common Rust",
-    tw: "Common Rust",
-    dag: "Common Rust",
+    tw: "Aburoo mfofoeeɛ",
+    dag: "Kanyanga bimbila",
   },
   grayLeafSpot: {
     en: "Gray Leaf Spot",
-    tw: "Grey Leaf Spot",
-    dag: "Gray Leaf Spot",
+    tw: "Ahaban nkaeɛ kɔkɔbiri",
+    dag: "Kanyanga vari daŋ sabila",
   },
   northernLeafBlight: {
     en: "Northern Leaf Blight",
-    tw: "Northern Leaf Blight",
-    dag: "Northern Leaf Blight",
+    tw: "Ahaban hyeeɛ kɛseɛ",
+    dag: "Kanyanga vari kuunli titali",
   },
   southernLeafBlight: {
     en: "Southern Leaf Blight",
-    tw: "Southern Leaf Blight",
-    dag: "Southern Leaf Blight",
+    tw: "Ahaban hyeeɛ nketewa",
+    dag: "Kanyanga vari kuunli bihi",
   },
   uncertain: {
     en: "Uncertain — Could not detect",

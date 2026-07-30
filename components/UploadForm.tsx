@@ -1,7 +1,17 @@
 "use client";
 
-import { Upload, Camera, X, ImageIcon } from "lucide-react";
+import {
+  Upload,
+  Camera,
+  X,
+  ImageIcon,
+  WifiOff,
+  Loader2,
+  AlertTriangle,
+  BrainCircuit,
+} from "lucide-react";
 import { useRef, useState, useEffect } from "react";
+import { isMaize, loadMaizeModel } from "@/utils/maizeValidator";
 
 type Language = "en" | "tw" | "dag";
 
@@ -13,29 +23,17 @@ const T: Record<string, Record<Language, string>> = {
   },
   cameraPermissionDenied: {
     en: "Camera permission denied. Please allow camera access in your browser settings.",
-    tw: "Wɔanka camera ho kwan. Yɛsrɛ wo ma camera kwan wɔ wo browser settings mu.",
+    tw: "W'amma camera ho kwan. Yɛsrɛ wo ma camera kwan wɔ wo browser settings mu.",
     dag: "Camera kpeema biɛla. Yɛn camera kpeema wɔ browser settings ni.",
   },
   cameraAccessFailed: {
     en: "Could not access camera. Please use the Upload option instead.",
-    tw: "Ɛntumi nnyaa camera. Yɛsrɛ wo fa Upload no fa so.",
+    tw: "Ɛntumi nnyaa camera. Yɛsrɛ wo fa Upload no so.",
     dag: "N-tum nya camera. Yɛn Upload option ni.",
   },
-  close: {
-    en: "Close",
-    tw: "To mu",
-    dag: "To",
-  },
-  cancel: {
-    en: "Cancel",
-    tw: "Gyae",
-    dag: "Gyae",
-  },
-  capturePhoto: {
-    en: "Capture Photo",
-    tw: "Twa Mfonini",
-    dag: "Twa Nimli",
-  },
+  close: { en: "Close", tw: "To mu", dag: "To" },
+  cancel: { en: "Cancel", tw: "Gyae", dag: "Gyae" },
+  capturePhoto: { en: "Capture Photo", tw: "Twa Mfonini", dag: "Twa Nimli" },
   uploadOrTakePhoto: {
     en: "Upload or Take a Photo",
     tw: "Twe anaa Twa Mfonini",
@@ -46,37 +44,79 @@ const T: Record<string, Record<Language, string>> = {
     tw: "JPG, JPEG, PNG na wɔgye",
     dag: "JPG, JPEG, PNG nima",
   },
-  useButtonsBelow: {
-    en: "Use the buttons below to get started",
-    tw: "Fa buttons a ɛwɔ aseɛ ha no fa ahyɛ aseɛ",
-    dag: "Zaŋ buttons niŋ ase",
-  },
-  changePhoto: {
-    en: "Change Photo",
-    tw: "Sesa Mfonini",
-    dag: "Sɔŋ Nimli",
-  },
-  uploadPhoto: {
-    en: "Upload Photo",
-    tw: "Twe Mfonini",
-    dag: "Zaŋ Nimli",
-  },
+  changePhoto: { en: "Change Photo", tw: "Sesa Mfonini", dag: "Sɔŋ Nimli" },
+  uploadPhoto: { en: "Upload Photo", tw: "Twe Mfonini", dag: "Zaŋ Nimli" },
   retakePhoto: {
     en: "Retake Photo",
     tw: "San Twa Mfonini",
     dag: "Twa Nimli Labi",
   },
-  takePhotoBtn: {
-    en: "Take Photo",
-    tw: "Twa Mfonini",
-    dag: "Twa Nimli",
+  takePhotoBtn: { en: "Take Photo", tw: "Twa Mfonini", dag: "Twa Nimli" },
+  removePhoto: { en: "Remove", tw: "Yi", dag: "Yi" },
+  validating: { en: "Checking image…", tw: "Rehwehwɛ mfonini no…", dag: "N-guuri nimli ŋɔ…" },
+  checkingMaize: {
+    en: "Verifying this is a maize leaf",
+    tw: "Rehwɛ sɛ ɛyɛ aburoo nhaban",
+    dag: "N-tu niŋ kɔbɔ n-nyɛ maize leaf",
   },
-  removePhoto: {
-    en: "Remove",
-    tw: "Yi",
-    dag: "Yi",
+  notMaize: {
+    en: "This does not appear to be a maize leaf. Please upload a clear photo of maize.",
+    tw: "Ɛnyɛ aburoo nhaban. Yɛsrɛ wo fa aburoo nhaban a ani da hɔ.",
+    dag: "A biɛla ka ni ŋ-ma nyɛ maize leaf. Yɛn zaŋ maize leaf photo.",
+  },
+  offlineMode: {
+    en: "Offline — validation skipped",
+    tw: "Internet nni hɔ — yɛntu nhwɛ",
+    dag: "Offline — n-guuri biɛla",
+  },
+  invalidImageType: {
+    en: "Please upload a valid image file (JPG, JPEG, or PNG).",
+    tw: "Yɛsrɛ wo twe mfonini a ɛfata (JPG, JPEG, anaa PNG).",
+    dag: "Yɛn zaŋ image file (JPG, JPEG, bee PNG).",
+  },
+  modelLoading: {
+    en: "Loading validator…",
+    tw: "Ɛreloade…",
+    dag: "N-lɔbi ɔ…",
+  },
+  modelLoadError: {
+    en: "Validator failed to load. Uploads will proceed without validation.",
+    tw: " Odi kan no antumi anloade. Yɛbɛtoa so a yɛnnhwe.",
+    dag: "AI model biɛla. Uploads n-guuri biɛla.",
   },
 };
+
+/* ───────────────────────────────
+   SHORT BUZZER (Web Audio API)
+   No external files needed.
+   ─────────────────────────────── */
+function playBuzzer() {
+  try {
+    const AudioCtx =
+      (window as any).AudioContext || (window as any).webkitAudioContext;
+    if (!AudioCtx) return;
+
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(1050, ctx.currentTime); // crisp C6 bell
+
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.3);
+    setTimeout(() => ctx.close(), 350);
+  } catch {
+    // silent fail
+  }
+}
 
 interface UploadFormProps {
   preview: string;
@@ -101,20 +141,99 @@ export default function UploadForm({
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraError, setCameraError] = useState("");
   const [isMobile, setIsMobile] = useState(false);
+  const [isOffline, setIsOffline] = useState(false);
+  const [validating, setValidating] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [modelReady, setModelReady] = useState(false);
+  const [modelError, setModelError] = useState(false);
 
   const t = (key: string) => T[key]?.[language] ?? key;
 
+  /* ── Network status ── */
+  useEffect(() => {
+    const sync = () => setIsOffline(!navigator.onLine);
+    sync();
+    window.addEventListener("online", sync);
+    window.addEventListener("offline", sync);
+    return () => {
+      window.removeEventListener("online", sync);
+      window.removeEventListener("offline", sync);
+    };
+  }, []);
+
+  /* ── Device detect ── */
   useEffect(() => {
     setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
   }, []);
 
+  /* ── Preload ONNX model on mount ── */
+  useEffect(() => {
+    loadMaizeModel()
+      .then(() => setModelReady(true))
+      .catch((err) => {
+        console.warn("[UploadForm] Model load failed:", err);
+        setModelError(true);
+      });
+  }, []);
+
+  /* ── Core validation wrapper ── */
+  const processFile = async (file: File) => {
+    setValidationError(null);
+
+    // Basic type guard
+    if (!file.type.startsWith("image/")) {
+      setValidationError(t("invalidImageType"));
+      onClear?.();
+      return;
+    }
+
+    // Offline → skip validation, allow straight through
+    if (isOffline || !navigator.onLine) {
+      onFileSelect(file);
+      return;
+    }
+
+    // Model failed to load → fail open (don't block user)
+    if (modelError) {
+      onFileSelect(file);
+      return;
+    }
+
+    // Wait for model if still loading
+    if (!modelReady) {
+      onFileSelect(file);
+      return;
+    }
+
+    // Online + model ready → run local ONNX inference
+    setValidating(true);
+    try {
+      const result = await isMaize(file);
+
+      if (result.isMaize) {
+        onFileSelect(file);
+      } else {
+        playBuzzer(); // ← 🔊 BUZZER SOUNDS HERE
+        setValidationError(`${t("notMaize")}`);
+        onClear?.();
+      }
+    } catch (err: any) {
+      console.warn("[UploadForm] ONNX inference error:", err.message);
+      onFileSelect(file);
+    } finally {
+      setValidating(false);
+    }
+  };
+
+  /* ── File input handler ── */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    onFileSelect(file);
+    processFile(file);
     e.target.value = "";
   };
 
+  /* ── Camera handlers ── */
   const openCamera = async () => {
     if (isMobile) {
       const input = document.createElement("input");
@@ -123,7 +242,7 @@ export default function UploadForm({
       input.setAttribute("capture", "environment");
       input.onchange = (e) => {
         const file = (e.target as HTMLInputElement).files?.[0];
-        if (file) onFileSelect(file);
+        if (file) processFile(file);
       };
       input.click();
       return;
@@ -133,7 +252,7 @@ export default function UploadForm({
     setCameraOpen(true);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment", width: 1280, height: 720 }
+        video: { facingMode: "environment", width: 1280, height: 720 },
       });
       streamRef.current = stream;
       if (videoRef.current) {
@@ -170,7 +289,7 @@ export default function UploadForm({
       const file = new File([blob], `capture-${Date.now()}.jpg`, {
         type: "image/jpeg",
       });
-      onFileSelect(file);
+      processFile(file);
       closeCamera();
     }, "image/jpeg", 0.92);
   };
@@ -189,18 +308,60 @@ export default function UploadForm({
       />
       <canvas ref={canvasRef} className="hidden" />
 
+      {/* ── MODEL STATUS BADGE ── */}
+      {!modelReady && !modelError && (
+        <div className="flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-700 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-300">
+          <Loader2 size={14} className="animate-spin" />
+          <span className="font-medium">{t("modelLoading")}</span>
+        </div>
+      )}
+
+      {modelError && (
+        <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+          <AlertTriangle size={14} />
+          <span className="font-medium">{t("modelLoadError")}</span>
+        </div>
+      )}
+
+      {/* ── OFFLINE BADGE ── */}
+      {isOffline && (
+        <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+          <WifiOff size={16} />
+          <span className="font-medium">{t("offlineMode")}</span>
+        </div>
+      )}
+
+      {/* ── VALIDATION ERROR BANNER ── */}
+      {validationError && (
+        <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 dark:border-red-900/50 dark:bg-red-950/20">
+          <AlertTriangle
+            size={18}
+            className="mt-0.5 flex-shrink-0 text-red-500"
+          />
+          <p className="flex-1 text-sm text-red-700 dark:text-red-300">
+            {validationError}
+          </p>
+          <button
+            onClick={() => setValidationError(null)}
+            className="flex-shrink-0 rounded-lg p-1 text-red-400 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/40"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
       {/* ── CAMERA MODAL ── */}
       {cameraOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden w-full max-w-2xl shadow-2xl">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-700">
-              <h3 className="font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <div className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-slate-900">
+            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-slate-700">
+              <h3 className="flex items-center gap-2 font-semibold text-slate-800 dark:text-slate-100">
                 <Camera size={18} className="text-green-600" />
                 {t("takePhoto")}
               </h3>
               <button
                 onClick={closeCamera}
-                className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition text-slate-500"
+                className="rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 <X size={20} />
               </button>
@@ -208,10 +369,10 @@ export default function UploadForm({
 
             {cameraError ? (
               <div className="p-6 text-center">
-                <p className="text-red-500 text-sm mb-4">{cameraError}</p>
+                <p className="mb-4 text-sm text-red-500">{cameraError}</p>
                 <button
                   onClick={closeCamera}
-                  className="px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm font-medium"
+                  className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-medium dark:bg-slate-800"
                 >
                   {t("close")}
                 </button>
@@ -224,19 +385,19 @@ export default function UploadForm({
                     autoPlay
                     playsInline
                     muted
-                    className="w-full max-h-96 object-contain"
+                    className="max-h-96 w-full object-contain"
                   />
                 </div>
                 <div className="flex justify-center gap-4 p-5">
                   <button
                     onClick={closeCamera}
-                    className="px-6 py-3 border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-xl font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+                    className="rounded-xl border-2 border-slate-200 px-6 py-3 font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                   >
                     {t("cancel")}
                   </button>
                   <button
                     onClick={capturePhoto}
-                    className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition flex items-center gap-2"
+                    className="flex items-center gap-2 rounded-xl bg-green-600 px-8 py-3 font-semibold text-white transition hover:bg-green-700"
                   >
                     <Camera size={18} />
                     {t("capturePhoto")}
@@ -251,67 +412,83 @@ export default function UploadForm({
       {/* ── PREVIEW / DROPZONE ── */}
       <div
         className={`relative rounded-2xl overflow-hidden transition-all duration-300
-          ${hasPreview
-            ? "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm"
-            : "bg-slate-50 dark:bg-slate-900/50 border-2 border-dashed border-slate-300 dark:border-slate-600 hover:border-green-400 dark:hover:border-green-500 hover:bg-green-50/30 dark:hover:bg-green-950/20"
+          ${
+            hasPreview
+              ? "border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900"
+              : "border-2 border-dashed border-slate-300 bg-slate-50 hover:border-green-400 hover:bg-green-50/30 dark:border-slate-600 dark:bg-slate-900/50 dark:hover:border-green-500 dark:hover:bg-green-950/20"
           }
         `}
       >
+        {/* Validating overlay */}
+        {validating && (
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 rounded-2xl bg-white/85 backdrop-blur-sm dark:bg-slate-900/85">
+            <BrainCircuit size={32} className="animate-pulse text-green-600" />
+            <p className="font-medium text-slate-800 dark:text-slate-100">
+              {t("validating")}
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {t("checkingMaize")}
+            </p>
+          </div>
+        )}
+
         {hasPreview ? (
-          /* ── IMAGE PREVIEW STATE ── */
           <div className="relative group">
-            {/* Image fills width, capped height, no awkward whitespace */}
-            <div className="w-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+            <div className="flex w-full items-center justify-center bg-slate-100 dark:bg-slate-800">
               <img
                 src={preview}
                 alt="Selected leaf"
-                className="w-full max-h-80 object-contain"
+                className="max-h-80 w-full object-contain"
               />
             </div>
 
-            {/* Top-right remove button */}
             {onClear && (
               <button
                 onClick={onClear}
-                className="absolute top-3 right-3 w-9 h-9 bg-white/90 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-full flex items-center justify-center transition-all shadow-md hover:shadow-lg backdrop-blur-sm border border-slate-200 dark:border-slate-600"
+                className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white/90 text-slate-600 shadow-md backdrop-blur-sm transition-all hover:bg-white hover:shadow-lg dark:border-slate-600 dark:bg-slate-800/90 dark:text-slate-300 dark:hover:bg-slate-700"
                 title={t("removePhoto")}
               >
                 <X size={16} />
               </button>
             )}
 
-            {/* Bottom info bar — clean, minimal */}
-            <div className="absolute bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border-t border-slate-200 dark:border-slate-700 px-4 py-2.5">
+            <div className="absolute bottom-0 left-0 right-0 border-t border-slate-200 bg-white/90 px-4 py-2.5 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/90">
               <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2 min-w-0">
-                  <ImageIcon size={14} className="text-green-600 dark:text-green-400 flex-shrink-0" />
-                  <p className="text-sm text-slate-700 dark:text-slate-200 font-medium truncate">
+                <div className="flex min-w-0 items-center gap-2">
+                  <ImageIcon
+                    size={14}
+                    className="flex-shrink-0 text-green-600 dark:text-green-400"
+                  />
+                  <p className="truncate text-sm font-medium text-slate-700 dark:text-slate-200">
                     {fileName}
                   </p>
                 </div>
-                <span className="text-xs text-slate-400 dark:text-slate-500 flex-shrink-0 hidden sm:inline">
-                  Ready to analyze
-                </span>
+                
               </div>
             </div>
           </div>
         ) : (
-          /* ── EMPTY / DROPZONE STATE ── */
           <button
             onClick={() => uploadRef.current?.click()}
-            className="w-full py-14 px-6 flex flex-col items-center justify-center gap-3 cursor-pointer"
+            className="flex w-full cursor-pointer flex-col items-center justify-center gap-3 px-6 py-14"
           >
-            <div className="w-16 h-16 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-1">
+            <div className="mb-1 flex h-16 w-16 items-center justify-center rounded-2xl bg-green-100 dark:bg-green-900/30">
               <div className="flex gap-3">
-                <Upload size={24} className="text-green-600 dark:text-green-400" />
-                <Camera size={24} className="text-green-600 dark:text-green-400" />
+                <Upload
+                  size={24}
+                  className="text-green-600 dark:text-green-400"
+                />
+                <Camera
+                  size={24}
+                  className="text-green-600 dark:text-green-400"
+                />
               </div>
             </div>
             <div className="text-center">
               <p className="text-base font-semibold text-slate-800 dark:text-slate-100">
                 {t("uploadOrTakePhoto")}
               </p>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                 {t("supportedFormats")}
               </p>
             </div>
@@ -324,7 +501,7 @@ export default function UploadForm({
         <button
           type="button"
           onClick={() => uploadRef.current?.click()}
-          className="flex items-center justify-center gap-2 border-2 border-green-600 dark:border-green-500 text-green-700 dark:text-green-400 py-3 rounded-xl font-semibold hover:bg-green-50 dark:hover:bg-green-950/30 transition text-sm"
+          className="flex items-center justify-center gap-2 rounded-xl border-2 border-green-600 py-3 text-sm font-semibold text-green-700 transition hover:bg-green-50 dark:border-green-500 dark:text-green-400 dark:hover:bg-green-950/30"
         >
           <Upload size={17} />
           {hasPreview ? t("changePhoto") : t("uploadPhoto")}
@@ -333,7 +510,7 @@ export default function UploadForm({
         <button
           type="button"
           onClick={openCamera}
-          className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold transition text-sm shadow-sm hover:shadow-md"
+          className="flex items-center justify-center gap-2 rounded-xl bg-green-600 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700 hover:shadow-md"
         >
           <Camera size={17} />
           {hasPreview ? t("retakePhoto") : t("takePhotoBtn")}

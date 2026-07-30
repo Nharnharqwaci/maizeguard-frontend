@@ -41,9 +41,9 @@ const T: Record<string, Record<Language, string>> = {
     dag: "Pampam",
   },
   heroDesc: {
-    en: "Upload a maize leaf image and let our AI identify Common Rust, Gray Leaf Spot, MSV, Northern Leaf Blight, Southern Leaf Blight, or confirm a Healthy crop with tailored treatment recommendations.",
-    tw: "Fa aburow ahaban mfonini gu so na ma yɛn AI nhu Common Rust, Grey Leaf Spot, MSV, Northern Leaf Blight, Southern Leaf Blight, anaasɛ fa ayaresa ho nyansahyɛ ahorow a ɛfata si nnɔbae a Ɛwɔ Akwahosan so dua.",
-    dag: "Zaŋ maize kpamli n-ti kpɛma n-nya Common Rust, Gray Leaf Spot, MSV, Northern Leaf Blight, Southern Leaf Blight, bee sɛ a sal' la, n-yɛn n-ti a kyaŋsim.",
+    en: "Upload a maize leaf image and let our AI identify Common Rust, Gray Leaf Spot, Maize Streak Virus, Northern Leaf Blight, Southern Leaf Blight, or confirm a Healthy crop with tailored treatment recommendations.",
+    tw: "Fa aburow ahaban mfonini gu so na ma yɛn AI nhu Aburoo mfofoeeɛ, Ahaban nkaeɛ kɔkɔbiri, Ahaban nsensaneeɛ, Ahaban hyeeɛ kɛseɛ, Ahaban hyeeɛ nketewa, anaasɛ fa ayaresa ho nyansahyɛ ahorow a ɛfata si nnɔbae a Ɛwɔ Akwahosan so dua.",
+    dag: "Zaŋ maize kpamli n-ti kpɛma n-nya Kanyanga bimbila, Kanyanga vari daŋ sabila, Kanyanga vari ninsalininsali, Kanyanga vari kuunli titali, Kanyanga vari kuunli bihi, bee sɛ a sal' la, n-yɛn n-ti a kyaŋsim.",
   },
   analyzeLeaf: {
     en: "Analyze Leaf",
@@ -201,20 +201,20 @@ const diseasesData: Record<Language, { name: string; desc: string }[]> = {
     { name: "Southern Leaf Blight", desc: "Small tan lesions with brown borders in warm humid conditions." },
   ],
   tw: [
-    { name: "Common Rust", desc: "Nsuo a ɛyɛ borɔdɔma-kɔkɔɔ a ɛwɔ nhaban ani a Puccinia sorghi de ba." },
-    { name: "Gray Leaf Spot", desc: "Akuru a ɛyɛ fitaa a ɛyɛ ahinanan a ɛwɔ nhaban ntini ntam wɔ tebea horow a ɛyɛ nwini mu." },
+    { name: "Aburoo mfofoeeɛ", desc: "Nsuo a ɛyɛ borɔdɔma-kɔkɔɔ a ɛwɔ nhaban ani a Puccinia sorghi de ba." },
+    { name: "Ahaban nkaeɛ kɔkɔbiri", desc: "Akuru a ɛyɛ fitaa a ɛyɛ ahinanan a ɛwɔ nhaban ntini ntam wɔ tebea horow a ɛyɛ nwini mu." },
     { name: "Apɔwmuden", desc: "Nhaban a ɛyɛ ahabammono a emu dɔ a ɛyɛ pɛ a nsensanee, nsensanee, anaa akuru biara nni so." },
-    { name: "MSV", desc: "Ntrɛwmu kɔkɔɔ a ɛwɔ nhaban so a Maize Streak Virus nam leafhoppers so de ba." },
-    { name: "Northern Leaf Blight", desc: "Akuru atenten a ɛte sɛ sigaret a ɛyɛ tan a Exserohilum turcicumde ba." },
-    { name: "Southern Leaf Blight", desc: "Akuru nketewa a ɛyɛ tan a ɛwɔ hye a ɛyɛ bruu wɔ tebea a ɛyɛ hyew a ɛyɛ nwini mu." },
+    { name: "Ahaban nsensaneeɛ", desc: "Ntrɛwmu kɔkɔɔ a ɛwɔ nhaban so a Maize Streak Virus nam leafhoppers so de ba." },
+    { name: "Ahaban hyeeɛ kɛseɛ", desc: "Akuru atenten a ɛte sɛ sigaret a ɛyɛ tan a Exserohilum turcicumde ba." },
+    { name: "Ahaban hyeeɛ nketewa", desc: "Akuru nketewa a ɛyɛ tan a ɛwɔ hye a ɛyɛ bruu wɔ tebea a ɛyɛ hyew a ɛyɛ nwini mu." },
   ],
   dag: [
-    { name: "Common Rust", desc: "Orange-red pustules kpamli so, Puccinia sorghi na ɛde ba." },
-    { name: "Gray Leaf Spot", desc: "Gray lesions rectangular, kpamli ntini ntam, bepow saŋa." },
+    { name: "Kanyanga bimbila", desc: "Orange-red pustules kpamli so, Puccinia sorghi na ɛde ba." },
+    { name: "Kanyanga vari daŋ sabila", desc: "Gray lesions rectangular, kpamli ntini ntam, bepow saŋa." },
     { name: "Kpalim zaa", desc: "Kpamli green, kuɣu biɛla, spots, streaks, bee lesions." },
-    { name: "MSV", desc: "Yellow streaks kpamli so, Maize Streak Virus, leafhoppers." },
-    { name: "Northern Leaf Blight", desc: "Tan lesions tenten, cigar, Exserohilum turcicum." },
-    { name: "Southern Leaf Blight", desc: "Tan lesions kakraba, brown nkyɛn, bepow saŋa." },
+    { name: "Kanyanga vari ninsalininsali", desc: "Yellow streaks kpamli so, Maize Streak Virus, leafhoppers." },
+    { name: "Kanyanga vari kuunli titali", desc: "Tan lesions tenten, cigar, Exserohilum turcicum." },
+    { name: "Kanyanga vari kuunli bihi", desc: "Tan lesions kakraba, brown nkyɛn, bepow saŋa." },
   ],
 };
 
