@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
-import { Target, Cpu, Globe, TrendingUp } from "lucide-react";
+import { Target, Globe, TrendingUp, Sprout, Camera, ShieldCheck } from "lucide-react";
 
 type Language = "en" | "tw" | "dag";
 
@@ -62,47 +62,60 @@ const T: Record<string, Record<Language, string>> = {
     tw: "Eyi bɛma wo mmuaeɛ a emu da hɔ fann a ɛfa nwura no ahoɔden tebea ho: sɛ ɛyɛ deɛ ahoɔden wɔ mu (Healthy), Ahaban nsensaneeɛ(MSV), Aburoo mfofoeeɛ(Common Rust), Ahaban nkaeɛ kɔkɔbiri(Gray Leaf Spot), Ahaban hyeeɛ kɛseɛ(Northern Leaf Blight), anaa Ahaban hyeeɛ nketewa(Southern Leaf Blight), ɛna ama wo nsaano nnuro ne afutuo a ɛbɛsa yadeɛ no pɔtee.",
     dag: "N-niŋsim n-nya diagnosis: Kpalim zaa, MSV, Common Rust, Gray Leaf Spot, Northern Leaf Blight, bee Southern Leaf Blight, ni kyaŋsim.",
   },
-  techStackTitle: {
-    en: "Technology Stack",
-    tw: "Nneɛma a Yɛde Yɛ",
-    dag: "N-Niŋsim Nneɛma",
+  benefitsTitle: {
+    en: "How MaizeGuard Helps You",
+    tw: "Kwan a MaizeGuard Boa Wo",
+    dag: "N-Niŋsim MaizeGuard Boa A",
+  },
+  benefit1Title: {
+    en: "Catch Diseases Early",
+    tw: "Hunu Yaree Ntɛm",
+    dag: "Nya Yɛl' Pampam",
+  },
+  benefit1Desc: {
+    en: "Spot problems in your maize before they spread across your whole farm. Early action means more food for your family.",
+    tw: "Hunu aburoo yareɛ ansa na atrɛw w'afuw no mu nyinaa. Sɛ wo yɛ ho adwuma ntɛm a, ɛkyerɛ sɛ wubenya aduan ma wo fifoɔ.",
+    dag: "Nya maize yɛl' saŋa din biɛla a kuɣu. Sɛ a yɛn yɛl' pampam a, a sal' la aduan.",
+  },
+  benefit2Title: {
+    en: "Easy as Taking a Photo",
+    tw: "Twa Mfonin, Ɛyɛ Mmerɛw koraa",
+    dag: "Zaŋ Nimli bee Yɛl' Suhira",
+  },
+  benefit2Desc: {
+    en: "No need for expert knowledge. Just snap a picture of your maize leaf with your phone and get answers instantly.",
+    tw: "Ɛnhia nimdeɛ soronko bia. Twa aburoo ahaban mfonini bi  na nya mmuaeɛ ntɛm.",
+    dag: "Biɛla n-ti kparibɔ zaŋ. Zaŋ maize kpamli nimli phone ni ni nya n-niŋsim pampam.",
+  },
+  benefit3Title: {
+    en: "Speak Your Language",
+    tw: "Kasa Wo Kasa Mu",
+    dag: "Yɛli A Yɛl' Kasi Ni",
+  },
+  benefit3Desc: {
+    en: "Get your results and farming advice in Twi, Dagbani, or English — whichever you understand best.",
+    tw: "Nya wo mmuaeɛ ne kuayɛ afotuo Twi, Dagbani, anaa English mu — kasa biara a wo te aseɛ yie.",
+    dag: "Nya n-niŋsim ni kyaŋsim Twi, Dagbani, bee English — yɛl' shɛli n-yɛn n-ti a.",
+  },
+  benefit4Title: {
+    en: "Expert Treatment Advice",
+    tw: "Afotuo a Ɛfiri Ɔkwanhunufoɔ",
+    dag: "Kyaŋsim din Be Kparibɔ",
+  },
+  benefit4Desc: {
+    en: "Know exactly what to do next — from which spray to use, to when to replant — so you never lose your harvest.",
+    tw: "Hunu  nea ɛsɛ sɛ woyɛ pɛpɛɛpɛ ɛyi akyi — firi sɛnea ɛbɛfa spray a wobɛtumi de di dwuma so, kɔsi bere a wobɛdua foforo bio — sɛnea ɛbɛyɛ a worenhwere wo nnɔbaeɛ da.",
+    dag: "Nya shɛli n-ti a yɛn — shɛli spray n-yɛn, saŋa din n-sow kpamli — ka chɛ ka a kɔbga.",
   },
   impactTitle: {
     en: "Expected Impact",
-    tw: "Nneyɛe a Yɛnhwɛ",
+    tw: "Nea a Yɛnhwɛ Kwan",
     dag: "N-Niŋsim din Yɛn",
   },
   impactDesc: {
-    en: "By enabling early disease detection, MaizeAI can help reduce crop losses, improve maize yields, increase farmer productivity, and contribute to food security in Ghana and beyond.",
-    tw: "Ɛdenam sɛnea ɛma wotumi hu nyarewa ntɛm so no, MaizeAI betumi aboa ma nnɔbae a wɔhwere no so atew, ama aburow aba atu mpɔn, ama akuafo nnɔbae akɔ soro, na aboa ma aduan a wobenya wɔ Ghana ne akyirikyiri.",
-    dag: "Sɛ a kparibɔ yɛl' pampam a, MaizeAI bɛtum atiŋda tuuma, maize bɛboro, ni aduan biɛla wɔ Ghana ni aman pahi.",
-  },
-};
-
-const techStackLabels: Record<Language, Record<string, string>> = {
-  en: {
-    Model: "Model",
-    Backend: "Backend",
-    Frontend: "Frontend",
-    Database: "Database",
-    Storage: "Storage",
-    Inference: "Inference",
-  },
-  tw: {
-    Model: "Model",
-    Backend: "Backend",
-    Frontend: "Frontend",
-    Database: "Database",
-    Storage: "Storage",
-    Inference: "Nhwehwɛmu",
-  },
-  dag: {
-    Model: "Model",
-    Backend: "Backend",
-    Frontend: "Frontend",
-    Database: "Database",
-    Storage: "Storage",
-    Inference: "Kparibɔ",
+    en: "By enabling early disease detection, MaizeGaurd can help reduce crop losses, improve maize yields, increase farmer productivity, and contribute to food security in Ghana and beyond.",
+    tw: "Ɛdenam sɛnea ɛma wotumi hu nyarewa ntɛm so no, MaizeGuard betumi aboa ma nnɔbae a wɔhwere no so atew, ama aburow aba atu mpɔn, ama akuafo nnɔbae akɔ soro, na aboa ma aduan a wobenya wɔ Ghana ne akyirikyiri.",
+    dag: "Sɛ a kparibɔ yɛl' pampam a, MaizeGuard bɛtum atiŋda tuuma, maize bɛboro, ni aduan biɛla wɔ Ghana ni aman pahi.",
   },
 };
 
@@ -126,15 +139,6 @@ const impactStats: Record<Language, { stat: string; label: string }[]> = {
     { stat: "Ghana", label: "Mantam din yɛn" },
   ],
 };
-
-const techStackItems = [
-  { key: "Model", value: "MobileNetV3", color: "bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-800 dark:text-green-300" },
-  { key: "Backend", value: "FastAPI + Python", color: "bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300" },
-  { key: "Frontend", value: "Next.js + Tailwind CSS", color: "bg-purple-50 dark:bg-purple-950 border-purple-200 dark:border-purple-800 text-purple-800 dark:text-purple-300" },
-  { key: "Database", value: "MongoDB Atlas", color: "bg-orange-50 dark:bg-orange-950 border-orange-200 dark:border-orange-800 text-orange-800 dark:text-orange-300" },
-  /*{ key: "Storage", value: "Cloudflare R2", color: "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-800 dark:text-slate-300" },*/
-  /*{ key: "Inference", value: "AI ", color: "bg-teal-50 dark:bg-teal-950 border-teal-200 dark:border-teal-800 text-teal-800 dark:text-teal-300" },*/
-];
 
 const impactColors = [
   "text-green-600 dark:text-green-400",
@@ -163,7 +167,6 @@ export default function AboutPage() {
   }, []);
 
   const t = (key: string) => T[key]?.[language] ?? key;
-  const techLabels = techStackLabels[language];
   const impacts = impactStats[language];
 
   return (
@@ -253,28 +256,61 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Technology Stack */}
+        {/* Benefits for Farmers (replaces Technology Stack) */}
         <section className="max-w-6xl mx-auto px-6 pb-16">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 p-10 transition-colors duration-200">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-2xl">
-                <Cpu size={36} className="text-blue-600 dark:text-blue-400" />
+          <h2 className="text-4xl font-bold mb-10 text-center text-slate-900 dark:text-slate-50">
+            {t("benefitsTitle")}
+          </h2>
+          <div className="grid sm:grid-cols-2 gap-6">
+
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 transition-colors duration-200">
+              <div className="w-12 h-12 rounded-2xl bg-red-100 dark:bg-red-900 flex items-center justify-center mb-5">
+                <Sprout size={24} className="text-red-600 dark:text-red-400" />
               </div>
-              <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-50">
-                {t("techStackTitle")}
-              </h2>
+              <h3 className="font-bold text-xl mb-3 text-slate-900 dark:text-slate-50">
+                {t("benefit1Title")}
+              </h3>
+              <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
+                {t("benefit1Desc")}
+              </p>
             </div>
-            <div className="grid sm:grid-cols-2 gap-4">
-              {techStackItems.map((item) => (
-                <div
-                  key={item.key}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl border ${item.color}`}
-                >
-                  <span className="font-semibold text-sm">{techLabels[item.key]}:</span>
-                  <span className="text-sm">{item.value}</span>
-                </div>
-              ))}
+
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 transition-colors duration-200">
+              <div className="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-900 flex items-center justify-center mb-5">
+                <Camera size={24} className="text-blue-600 dark:text-blue-400" />
+              </div>
+              <h3 className="font-bold text-xl mb-3 text-slate-900 dark:text-slate-50">
+                {t("benefit2Title")}
+              </h3>
+              <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
+                {t("benefit2Desc")}
+              </p>
             </div>
+
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 transition-colors duration-200">
+              <div className="w-12 h-12 rounded-2xl bg-purple-100 dark:bg-purple-900 flex items-center justify-center mb-5">
+                <Globe size={24} className="text-purple-600 dark:text-purple-400" />
+              </div>
+              <h3 className="font-bold text-xl mb-3 text-slate-900 dark:text-slate-50">
+                {t("benefit3Title")}
+              </h3>
+              <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
+                {t("benefit3Desc")}
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 transition-colors duration-200">
+              <div className="w-12 h-12 rounded-2xl bg-green-100 dark:bg-green-900 flex items-center justify-center mb-5">
+                <ShieldCheck size={24} className="text-green-600 dark:text-green-400" />
+              </div>
+              <h3 className="font-bold text-xl mb-3 text-slate-900 dark:text-slate-50">
+                {t("benefit4Title")}
+              </h3>
+              <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
+                {t("benefit4Desc")}
+              </p>
+            </div>
+
           </div>
         </section>
 
