@@ -53,7 +53,11 @@ const T: Record<string, Record<Language, string>> = {
   },
   takePhotoBtn: { en: "Take Photo", tw: "Twa Mfonini", dag: "Twa Nimli" },
   removePhoto: { en: "Remove", tw: "Yi", dag: "Yi" },
-  validating: { en: "Checking image…", tw: "Rehwehwɛ mfonini no…", dag: "N-guuri nimli ŋɔ…" },
+  validating: {
+    en: "Checking image…",
+    tw: "Rehwehwɛ mfonini no…",
+    dag: "N-guuri nimli ŋɔ…",
+  },
   checkingMaize: {
     en: "Verifying this is a maize leaf",
     tw: "Rehwɛ sɛ ɛyɛ aburoo nhaban",
@@ -87,16 +91,32 @@ const T: Record<string, Record<Language, string>> = {
 };
 
 /* ───────────────────────────────
-   SHORT BUZZER (Web Audio API)
-   No external files needed.
+   SHARED AUDIO CONTEXT
+   (mobile browsers require resume)
+   ─────────────────────────────── */
+let audioCtx: AudioContext | null = null;
+
+function getAudioCtx(): AudioContext | null {
+  const AudioCtx =
+    (window as any).AudioContext || (window as any).webkitAudioContext;
+  if (!AudioCtx) return null;
+  if (!audioCtx) audioCtx = new AudioCtx();
+  return audioCtx;
+}
+
+/* ───────────────────────────────
+   CLASSIC APPLE "DING"
    ─────────────────────────────── */
 function playBuzzer() {
   try {
-    const AudioCtx =
-      (window as any).AudioContext || (window as any).webkitAudioContext;
-    if (!AudioCtx) return;
+    const ctx = getAudioCtx();
+    if (!ctx) return;
 
-    const ctx = new AudioCtx();
+    // Mobile browsers start suspended; resume first
+    if (ctx.state === "suspended") {
+      ctx.resume();
+    }
+
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
@@ -112,9 +132,8 @@ function playBuzzer() {
 
     osc.start();
     osc.stop(ctx.currentTime + 0.3);
-    setTimeout(() => ctx.close(), 350);
   } catch {
-    // silent fail
+    // silent fail if audio is blocked by browser policy
   }
 }
 
@@ -148,6 +167,22 @@ export default function UploadForm({
   const [modelError, setModelError] = useState(false);
 
   const t = (key: string) => T[key]?.[language] ?? key;
+
+  /* ── Unlock audio on first user gesture (critical for mobile) ── */
+  useEffect(() => {
+    const unlock = () => {
+      const ctx = getAudioCtx();
+      if (ctx && ctx.state === "suspended") {
+        ctx.resume();
+      }
+    };
+    window.addEventListener("touchstart", unlock, { once: true });
+    window.addEventListener("click", unlock, { once: true });
+    return () => {
+      window.removeEventListener("touchstart", unlock);
+      window.removeEventListener("click", unlock);
+    };
+  }, []);
 
   /* ── Network status ── */
   useEffect(() => {
@@ -213,7 +248,7 @@ export default function UploadForm({
       if (result.isMaize) {
         onFileSelect(file);
       } else {
-        playBuzzer(); // ← 🔊 BUZZER SOUNDS HERE
+        playBuzzer(); // ← 🔊 DING SOUNDS HERE
         setValidationError(`${t("notMaize")}`);
         onClear?.();
       }
@@ -463,7 +498,6 @@ export default function UploadForm({
                     {fileName}
                   </p>
                 </div>
-                
               </div>
             </div>
           </div>

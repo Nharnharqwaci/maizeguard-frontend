@@ -29,17 +29,17 @@ const T: Record<string, Record<Language, string>> = {
   },
   resetPassword: {
     en: "Reset Password",
-    tw: "San To Paswɛde",
+    tw: "Sese Paswɛde",
     dag: "Lab'li yɛltɔɣ' kpɛma",
   },
   resetting: {
     en: "Resetting...",
-    tw: "Ɛresan to...",
+    tw: "Ɛresesa no...",
     dag: "N-nyɛra lab'li...",
   },
   backToLogin: {
     en: "Back to Login",
-    tw: "San Kɔ Login",
+    tw: "San Kɔ Mu",
     dag: "Lab'li kpɛm kpɛlo",
   },
   resetSuccessTitle: {
@@ -59,7 +59,7 @@ const T: Record<string, Record<Language, string>> = {
   },
   resetFailed: {
     en: "Password reset failed. Please try again.",
-    tw: "Paswɛde san to no ankɔ yie. Yɛsrɛ wo san yɛ bio.",
+    tw: "Paswɛde sesa no ankɔ yie. Yɛsrɛ wo san yɛ bio.",
     dag: "Yɛltɔɣ' kpɛma lab'li daa. M bɔri suɣulo tuuli labi.",
   },
 };

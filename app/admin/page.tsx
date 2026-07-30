@@ -32,6 +32,7 @@ import {
   KeyRound,
   Copy,
   CheckCircle,
+  Menu,
 } from "lucide-react";
 
 type Language = "en" | "tw" | "dag";
@@ -121,6 +122,7 @@ const T: Record<string, Record<Language, string>> = {
   copy: { en: "Copy", tw: "Kɔpi", dag: "Copy" },
   close: { en: "Close", tw: "To mu", dag: "Toom" },
 };
+
 interface AnalyticsData {
   users: {
     total: number;
@@ -247,6 +249,7 @@ function displayName(name: string, tFn?: (k: string) => string): string {
   }
   return name;
 }
+
 export default function AdminPage() {
   const router = useRouter();
   const [language, setLanguage] = useState<Language>("en");
@@ -254,6 +257,7 @@ export default function AdminPage() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
@@ -495,25 +499,36 @@ export default function AdminPage() {
     );
   }
 
+  const tabs = [
+    { id: "analytics" as const, label: t("systemAnalytics"), icon: BarChart3 },
+    { id: "users" as const, label: t("userManagement"), icon: Users },
+    { id: "scans" as const, label: t("scanManagement"), icon: ScanSearch },
+    { id: "activity" as const, label: t("activityLog"), icon: Clock },
+  ];
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
-      <header className="bg-slate-900 dark:bg-slate-950 border-b border-slate-800 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+
+      {/* ── HERO HEADER ── */}
+      <section className="bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-600 dark:from-purple-900 dark:via-purple-800 dark:to-indigo-800 text-white transition-colors duration-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center">
-                <Crown size={22} className="text-white" />
+              <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center">
+                <Crown size={24} className="text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-white">{t("adminPanel")}</h1>
-                <p className="text-xs text-slate-400">MaizeAI System Control</p>
+                <h1 className="text-3xl sm:text-4xl font-bold text-white">{t("adminPanel")}</h1>
+                <p className="text-purple-100 text-sm mt-1">MaizeGuard System Control</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+
+            {/* Desktop actions */}
+            <div className="hidden sm:flex items-center gap-2">
               <div className="relative" ref={langPickerRef}>
                 <button
                   onClick={() => setShowLangPicker((v) => !v)}
-                  className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-xl transition-colors text-sm font-medium border border-slate-700"
+                  className="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 backdrop-blur text-white px-3 py-2 rounded-xl transition-colors text-sm font-medium"
                 >
                   <Globe size={14} />
                   <span className="uppercase text-xs font-bold">{language}</span>
@@ -547,94 +562,140 @@ export default function AdminPage() {
               </div>
               <button
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-sm transition-colors"
-                title="Toggle dark mode"
+                className="p-2.5 bg-white/20 hover:bg-white/30 backdrop-blur text-white rounded-xl transition-colors"
               >
-                {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
+                {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
               </button>
-              <button onClick={handleRefresh} className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-sm transition-colors">
+              <button onClick={handleRefresh} className="flex items-center gap-2 px-3 py-2.5 bg-white/20 hover:bg-white/30 backdrop-blur text-white rounded-xl text-sm transition-colors">
                 <RefreshCw size={14} /> {t("refresh")}
               </button>
-              <button onClick={() => setShowRegisterModal(true)} className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm transition-colors">
+              <button onClick={() => setShowRegisterModal(true)} className="flex items-center gap-2 px-3 py-2.5 bg-white/20 hover:bg-white/30 backdrop-blur text-white rounded-xl text-sm transition-colors">
                 <UserPlus size={14} /> {t("registerUser")}
               </button>
-              <Link href="/dashboard" className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm transition-colors">
+              <Link href="/dashboard" className="flex items-center gap-2 px-3 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl text-sm transition-colors">
                 <ChevronLeft size={14} /> {t("backToDashboard")}
               </Link>
             </div>
-          </div>
-        </div>
-      </header>
 
-      <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex gap-1">
-            {(["analytics", "users", "scans", "activity"] as const).map((tab) => (
-              <button key={tab} onClick={() => setActiveTab(tab)}
-                className={`px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === tab ? "border-purple-500 text-purple-600 dark:text-purple-400" : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
-                }`}>
-                {tab === "analytics" && t("systemAnalytics")}
-                {tab === "users" && t("userManagement")}
-                {tab === "scans" && t("scanManagement")}
-                {tab === "activity" && t("activityLog")}
+            {/* Mobile menu toggle */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="sm:hidden p-2.5 bg-white/20 hover:bg-white/30 backdrop-blur rounded-xl self-end"
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
+
+          {/* Mobile actions dropdown */}
+          {mobileMenuOpen && (
+            <div className="sm:hidden mt-4 flex flex-wrap gap-2">
+              <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="flex items-center gap-2 px-3 py-2 bg-white/20 rounded-xl text-sm">
+                {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />} Theme
               </button>
-            ))}
+              <button onClick={handleRefresh} className="flex items-center gap-2 px-3 py-2 bg-white/20 rounded-xl text-sm">
+                <RefreshCw size={14} /> {t("refresh")}
+              </button>
+              <button onClick={() => { setShowRegisterModal(true); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-3 py-2 bg-white/20 rounded-xl text-sm">
+                <UserPlus size={14} /> {t("registerUser")}
+              </button>
+              <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 px-3 py-2 bg-green-500 rounded-xl text-sm">
+                <ChevronLeft size={14} /> {t("backToDashboard")}
+              </Link>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ── STATS CARDS ── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 -mt-8 sm:-mt-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
+          {[
+            { label: t("totalUsers"), value: analytics?.users.total ?? 0, icon: Users, color: "blue" },
+            { label: t("totalFarmers"), value: analytics?.users.farmers ?? 0, icon: Leaf, color: "green" },
+            { label: t("totalAdmins"), value: analytics?.users.admins ?? 0, icon: Crown, color: "purple" },
+            { label: t("totalScans"), value: analytics?.scans.total ?? 0, icon: ScanSearch, color: "orange" },
+            { label: t("scansToday"), value: analytics?.scans.today ?? 0, icon: Activity, color: "red" },
+            { label: t("scansThisWeek"), value: analytics?.scans.this_week ?? 0, icon: Calendar, color: "amber" },
+            { label: t("newUsersToday"), value: analytics?.users.new_today ?? 0, icon: UserPlus, color: "teal" },
+            { label: t("avgScansPerUser"), value: analytics?.scans.avg_per_user ?? 0, icon: TrendingUp, color: "indigo" },
+          ].map((stat, i) => (
+            <div key={i} className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg transition-colors">
+              <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center bg-${stat.color}-100 dark:bg-${stat.color}-900`}>
+                  <stat.icon size={16} className={`text-${stat.color}-600 dark:text-${stat.color}-400 sm:hidden`} />
+                  <stat.icon size={20} className={`text-${stat.color}-600 dark:text-${stat.color}-400 hidden sm:block`} />
+                </div>
+                <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 leading-tight">{stat.label}</span>
+              </div>
+              <p className="text-xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50">
+                {analyticsLoading ? "—" : stat.value}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── MOST ACTIVE USER BANNER ── */}
+      {analytics?.scans.most_active_user && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 mt-4 sm:mt-6">
+          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-white shadow-lg">
+            <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+              <Crown size={16} className="sm:hidden" />
+              <Crown size={20} className="hidden sm:block" />
+              <span className="font-semibold text-sm sm:text-base">{t("mostActiveUser")}</span>
+            </div>
+            <p className="text-xl sm:text-3xl font-bold">
+              {displayName(analytics.scans.most_active_user.name, t)}
+            </p>
+            <p className="text-purple-200 text-xs sm:text-sm mt-1">
+              {analytics.scans.most_active_user.scan_count} {t("scansPerformed")}
+            </p>
+          </div>
+        </section>
+      )}
+
+      {/* ── TABS ── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 mt-6 sm:mt-8">
+        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl sm:rounded-3xl shadow-sm p-1.5 sm:p-2 overflow-x-auto">
+          <div className="flex gap-1 min-w-max">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              const active = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
+                    active
+                      ? "bg-purple-600 text-white shadow-md"
+                      : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  }`}
+                >
+                  <Icon size={14} className="sm:hidden" />
+                  <Icon size={16} className="hidden sm:block" />
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
         </div>
-      </div>
+      </section>
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      {/* ── MAIN CONTENT ── */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-20">
+
+        {/* ANALYTICS TAB */}
         {activeTab === "analytics" && (
-          <div className="space-y-8">
-            <div className="grid md:grid-cols-4 gap-4">
-              {[
-                { label: t("totalUsers"), value: analytics?.users.total ?? 0, icon: Users, color: "blue" },
-                { label: t("totalFarmers"), value: analytics?.users.farmers ?? 0, icon: Leaf, color: "green" },
-                { label: t("totalAdmins"), value: analytics?.users.admins ?? 0, icon: Crown, color: "purple" },
-                { label: t("totalScans"), value: analytics?.scans.total ?? 0, icon: ScanSearch, color: "orange" },
-                { label: t("scansToday"), value: analytics?.scans.today ?? 0, icon: Activity, color: "red" },
-                { label: t("scansThisWeek"), value: analytics?.scans.this_week ?? 0, icon: Calendar, color: "amber" },
-                { label: t("newUsersToday"), value: analytics?.users.new_today ?? 0, icon: UserPlus, color: "teal" },
-                { label: t("avgScansPerUser"), value: analytics?.scans.avg_per_user ?? 0, icon: TrendingUp, color: "indigo" },
-              ].map((stat, i) => (
-                <div key={i} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className={`w-9 h-9 bg-${stat.color}-100 dark:bg-${stat.color}-900 rounded-lg flex items-center justify-center`}>
-                      <stat.icon size={18} className={`text-${stat.color}-600 dark:text-${stat.color}-400`} />
-                    </div>
-                    <span className="text-xs text-slate-500 dark:text-slate-400">{stat.label}</span>
-                  </div>
-                  <p className="text-2xl font-bold text-slate-900 dark:text-slate-50">
-                    {analyticsLoading ? "—" : stat.value}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            {analytics?.scans.most_active_user && (
-              <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-6 text-white">
-                <div className="flex items-center gap-3 mb-2">
-                  <Crown size={20} />
-                  <span className="font-semibold">{t("mostActiveUser")}</span>
-                </div>
-                <p className="text-3xl font-bold">
-                  {displayName(analytics.scans.most_active_user.name, t)}
-                </p>
-                <p className="text-purple-200 text-sm mt-1">
-                  {analytics.scans.most_active_user.scan_count} {t("scansPerformed")}
-                </p>
-              </div>
-            )}
-
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
+          <div className="space-y-4 sm:space-y-6">
+            <div className="grid md:grid-cols-3 gap-4 sm:gap-6">
+              {/* Disease Breakdown */}
+              <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg transition-colors">
                 <div className="flex items-center gap-2 mb-4">
                   <PieChart size={18} className="text-purple-600" />
-                  <h3 className="font-bold text-slate-900 dark:text-slate-50">{t("diseaseBreakdown")}</h3>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-50 text-sm sm:text-base">{t("diseaseBreakdown")}</h3>
                 </div>
                 {analyticsLoading ? <p className="text-slate-400 text-sm">{t("loading")}</p> : (
-                  <div className="space-y-2">
+                  <div className="space-y-2 sm:space-y-3">
                     {Object.entries(analytics?.diseases.breakdown ?? {})
                       .sort(([, a], [, b]) => b - a)
                       .map(([disease, count]) => {
@@ -648,7 +709,7 @@ export default function AdminPage() {
                             <div className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-full h-1.5">
                               <div className="h-1.5 rounded-full bg-purple-500" style={{ width: `${pct}%` }} />
                             </div>
-                            <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 w-8 text-right">{count}</span>
+                            <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 w-6 text-right">{count}</span>
                           </div>
                         );
                       })}
@@ -660,10 +721,11 @@ export default function AdminPage() {
                 )}
               </div>
 
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
+              {/* Language Distribution */}
+              <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg transition-colors">
                 <div className="flex items-center gap-2 mb-4">
                   <Globe size={18} className="text-blue-600" />
-                  <h3 className="font-bold text-slate-900 dark:text-slate-50">{t("languageDistribution")}</h3>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-50 text-sm sm:text-base">{t("languageDistribution")}</h3>
                 </div>
                 {analyticsLoading ? <p className="text-slate-400 text-sm">{t("loading")}</p> : (
                   <div className="space-y-3">
@@ -674,7 +736,7 @@ export default function AdminPage() {
                         const pct = Math.round((count / total) * 100);
                         return (
                           <div key={lang} className="flex items-center gap-3">
-                            <span className="text-lg">{langFlags[lang] ?? "🌐"}</span>
+                            <span className="text-base sm:text-lg">{langFlags[lang] ?? "🌐"}</span>
                             <div className="flex-1">
                               <div className="flex justify-between text-xs mb-1">
                                 <span className="font-medium text-slate-700 dark:text-slate-300">{langLabels[lang] ?? lang}</span>
@@ -695,23 +757,24 @@ export default function AdminPage() {
                 )}
               </div>
 
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
+              {/* Health Rate */}
+              <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg transition-colors">
                 <div className="flex items-center gap-2 mb-4">
                   <Activity size={18} className="text-green-600" />
-                  <h3 className="font-bold text-slate-900 dark:text-slate-50">{t("healthRate")}</h3>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-50 text-sm sm:text-base">{t("healthRate")}</h3>
                 </div>
                 {analyticsLoading ? <p className="text-slate-400 text-sm">{t("loading")}</p> : (
                   <div className="text-center py-4">
-                    <div className="relative w-32 h-32 mx-auto mb-4">
+                    <div className="relative w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-4">
                       <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                         <path className="text-slate-100 dark:text-slate-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
                         <path className="text-green-500" strokeDasharray={`${analytics?.diseases.health_rate ?? 0}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
                       </svg>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-2xl font-bold text-slate-900 dark:text-slate-50">{analytics?.diseases.health_rate ?? 0}%</span>
+                        <span className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-50">{analytics?.diseases.health_rate ?? 0}%</span>
                       </div>
                     </div>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                    <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
                       {analytics?.diseases.healthy_count ?? 0} healthy / {analytics?.diseases.disease_count ?? 0} diseased
                     </p>
                   </div>
@@ -719,17 +782,18 @@ export default function AdminPage() {
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
+            <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
+              {/* Monthly Growth */}
+              <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg transition-colors">
                 <div className="flex items-center gap-2 mb-4">
                   <TrendingUp size={18} className="text-blue-600" />
-                  <h3 className="font-bold text-slate-900 dark:text-slate-50">{t("monthlyGrowth")}</h3>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-50 text-sm sm:text-base">{t("monthlyGrowth")}</h3>
                 </div>
                 {analyticsLoading ? <p className="text-slate-400">{t("loading")}</p> : (
                   <div className="space-y-2">
                     {analytics?.users.monthly_growth.map((m) => (
                       <div key={`${m.year}-${m.month}`} className="flex items-center gap-3">
-                        <span className="text-xs text-slate-500 w-16">{monthName(m.year, m.month)}</span>
+                        <span className="text-xs text-slate-500 w-14 sm:w-16">{monthName(m.year, m.month)}</span>
                         <div className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-full h-2">
                           <div className="h-2 rounded-full bg-blue-500" style={{ width: `${Math.min(100, m.count * 5)}%` }} />
                         </div>
@@ -740,16 +804,17 @@ export default function AdminPage() {
                 )}
               </div>
 
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
+              {/* Scan Trends */}
+              <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg transition-colors">
                 <div className="flex items-center gap-2 mb-4">
                   <BarChart3 size={18} className="text-green-600" />
-                  <h3 className="font-bold text-slate-900 dark:text-slate-50">{t("scanTrends")}</h3>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-50 text-sm sm:text-base">{t("scanTrends")}</h3>
                 </div>
                 {analyticsLoading ? <p className="text-slate-400">{t("loading")}</p> : (
                   <div className="space-y-2">
                     {analytics?.scans.monthly_trends.map((m) => (
                       <div key={`${m.year}-${m.month}`} className="flex items-center gap-3">
-                        <span className="text-xs text-slate-500 w-16">{monthName(m.year, m.month)}</span>
+                        <span className="text-xs text-slate-500 w-14 sm:w-16">{monthName(m.year, m.month)}</span>
                         <div className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-full h-2">
                           <div className="h-2 rounded-full bg-green-500" style={{ width: `${Math.min(100, m.count * 2)}%` }} />
                         </div>
@@ -761,20 +826,21 @@ export default function AdminPage() {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
+            {/* Daily Activity */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-lg transition-colors">
               <div className="flex items-center gap-2 mb-4">
                 <Activity size={18} className="text-orange-600" />
-                <h3 className="font-bold text-slate-900 dark:text-slate-50">{t("dailyActivity")}</h3>
+                <h3 className="font-bold text-slate-900 dark:text-slate-50 text-sm sm:text-base">{t("dailyActivity")}</h3>
               </div>
               {analyticsLoading ? <p className="text-slate-400">{t("loading")}</p> : (
-                <div className="flex items-end gap-1 h-32 overflow-x-auto">
+                <div className="flex items-end gap-1 h-24 sm:h-32 overflow-x-auto pb-2">
                   {analytics?.scans.daily_activity.map((d) => {
                     const maxCount = Math.max(...(analytics?.scans.daily_activity.map(x => x.count) ?? [1]), 1);
                     const height = Math.max(4, (d.count / maxCount) * 100);
                     return (
-                      <div key={d.date} className="flex-1 flex flex-col items-center gap-1 min-w-[20px]">
+                      <div key={d.date} className="flex-1 flex flex-col items-center gap-1 min-w-[16px] sm:min-w-[20px]">
                         <div className="w-full bg-orange-200 dark:bg-orange-900 rounded-t" style={{ height: `${height}%` }} />
-                        <span className="text-[8px] text-slate-400 rotate-0">{d.date.slice(5)}</span>
+                        <span className="text-[7px] sm:text-[8px] text-slate-400">{d.date.slice(5)}</span>
                       </div>
                     );
                   })}
@@ -783,12 +849,14 @@ export default function AdminPage() {
             </div>
           </div>
         )}
+
+        {/* USERS TAB */}
         {activeTab === "users" && (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-              <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl sm:rounded-3xl shadow-lg overflow-hidden transition-colors">
+            <div className="p-4 sm:p-6 border-b border-slate-100 dark:border-slate-700">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <h2 className="text-lg font-bold text-slate-900 dark:text-slate-50">{t("userManagement")}</h2>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <select
                     value={roleFilter}
                     onChange={(e) => { setRoleFilter(e.target.value); setUsersPage(0); }}
@@ -798,7 +866,7 @@ export default function AdminPage() {
                     <option value="farmer">{t("farmer")}</option>
                     <option value="admin">{t("admin")}</option>
                   </select>
-                  <div className="relative">
+                  <div className="relative flex-1 sm:flex-none">
                     <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input
                       type="text"
@@ -811,7 +879,7 @@ export default function AdminPage() {
                           setUsersSearch(usersSearchInput);
                         }
                       }}
-                      className="pl-9 pr-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-800 text-sm w-56 text-slate-900 dark:text-slate-50"
+                      className="pl-9 pr-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-800 text-sm w-full sm:w-56 text-slate-900 dark:text-slate-50"
                     />
                   </div>
                 </div>
@@ -823,72 +891,74 @@ export default function AdminPage() {
               <div className="p-8 text-center text-slate-400">{t("noUsers")}</div>
             ) : (
               <>
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("name")}</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("phone")}</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("role")}</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("scans")}</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("language")}</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("lastActive")}</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("joined")}</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("actions")}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {users.map((user) => (
-                      <tr key={user.id} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${user.role === "admin" ? "bg-purple-100 dark:bg-purple-900 text-purple-700" : "bg-green-100 dark:bg-green-900 text-green-700"}`}>
-                              {user.full_name.charAt(0).toUpperCase()}
-                            </div>
-                            <span className="text-sm font-medium text-slate-900 dark:text-slate-50">{user.full_name}</span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300">{user.phone_number}</td>
-                        <td className="px-4 py-3">
-                          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${user.role === "admin" ? "bg-purple-100 dark:bg-purple-900 text-purple-700" : "bg-green-100 dark:bg-green-900 text-green-700"}`}>
-                            {user.role}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300">{user.scan_count}</td>
-                        <td className="px-4 py-3">
-                          <span className="flex items-center gap-1 text-sm">
-                            <span>{langFlags[user.language] ?? "🌐"}</span>
-                            <span className="text-slate-600 dark:text-slate-300">{langLabels[user.language] ?? user.language}</span>
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-xs text-slate-500">{timeAgo(user.last_active)}</td>
-                        <td className="px-4 py-3 text-xs text-slate-500">{formatDate(user.created_at)}</td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-1">
-                            <button onClick={() => handleViewUserScans(user.id)} className="p-1.5 bg-blue-100 dark:bg-blue-900 text-blue-600 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800" title="View Scans">
-                              <Eye size={13} />
-                            </button>
-                            {user.role === "farmer" ? (
-                              <button onClick={() => handleUpdateRole(user.id, "admin")} className="p-1.5 bg-purple-100 dark:bg-purple-900 text-purple-600 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-800" title={t("makeAdmin")}>
-                                <Crown size={13} />
-                              </button>
-                            ) : (
-                              <button onClick={() => handleUpdateRole(user.id, "farmer")} className="p-1.5 bg-green-100 dark:bg-green-900 text-green-600 rounded-lg hover:bg-green-200 dark:hover:bg-green-800" title={t("makeFarmer")}>
-                                <Leaf size={13} />
-                              </button>
-                            )}
-                            <button onClick={() => handleResetPassword(user.id, user.full_name)} className="p-1.5 bg-amber-100 dark:bg-amber-900 text-amber-600 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-800" title={t("resetPassword")}>
-                              <KeyRound size={13} />
-                            </button>
-                            <button onClick={() => handleDeleteUser(user.id)} className="p-1.5 bg-red-100 dark:bg-red-900 text-red-600 rounded-lg hover:bg-red-200 dark:hover:bg-red-800" title={t("delete")}>
-                              <Trash2 size={13} />
-                            </button>
-                          </div>
-                        </td>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[700px]">
+                    <thead>
+                      <tr className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("name")}</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("phone")}</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("role")}</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("scans")}</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("language")}</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("lastActive")}</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("joined")}</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("actions")}</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 dark:border-slate-700">
+                    </thead>
+                    <tbody>
+                      {users.map((user) => (
+                        <tr key={user.id} className="border-b border-slate-50 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${user.role === "admin" ? "bg-purple-100 dark:bg-purple-900 text-purple-700" : "bg-green-100 dark:bg-green-900 text-green-700"}`}>
+                                {user.full_name.charAt(0).toUpperCase()}
+                              </div>
+                              <span className="text-sm font-medium text-slate-900 dark:text-slate-50">{user.full_name}</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300">{user.phone_number}</td>
+                          <td className="px-4 py-3">
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${user.role === "admin" ? "bg-purple-100 dark:bg-purple-900 text-purple-700" : "bg-green-100 dark:bg-green-900 text-green-700"}`}>
+                              {user.role}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300">{user.scan_count}</td>
+                          <td className="px-4 py-3">
+                            <span className="flex items-center gap-1 text-sm">
+                              <span>{langFlags[user.language] ?? "🌐"}</span>
+                              <span className="text-slate-600 dark:text-slate-300">{langLabels[user.language] ?? user.language}</span>
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-xs text-slate-500">{timeAgo(user.last_active)}</td>
+                          <td className="px-4 py-3 text-xs text-slate-500">{formatDate(user.created_at)}</td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-1">
+                              <button onClick={() => handleViewUserScans(user.id)} className="p-1.5 bg-blue-100 dark:bg-blue-900 text-blue-600 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800" title="View Scans">
+                                <Eye size={13} />
+                              </button>
+                              {user.role === "farmer" ? (
+                                <button onClick={() => handleUpdateRole(user.id, "admin")} className="p-1.5 bg-purple-100 dark:bg-purple-900 text-purple-600 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-800" title={t("makeAdmin")}>
+                                  <Crown size={13} />
+                                </button>
+                              ) : (
+                                <button onClick={() => handleUpdateRole(user.id, "farmer")} className="p-1.5 bg-green-100 dark:bg-green-900 text-green-600 rounded-lg hover:bg-green-200 dark:hover:bg-green-800" title={t("makeFarmer")}>
+                                  <Leaf size={13} />
+                                </button>
+                              )}
+                              <button onClick={() => handleResetPassword(user.id, user.full_name)} className="p-1.5 bg-amber-100 dark:bg-amber-900 text-amber-600 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-800" title={t("resetPassword")}>
+                                <KeyRound size={13} />
+                              </button>
+                              <button onClick={() => handleDeleteUser(user.id)} className="p-1.5 bg-red-100 dark:bg-red-900 text-red-600 rounded-lg hover:bg-red-200 dark:hover:bg-red-800" title={t("delete")}>
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-t border-slate-200 dark:border-slate-700">
                   <span className="text-sm text-slate-500">{t("page")} {usersPage + 1} {t("of")} {Math.ceil(usersTotal / pageSize)}</span>
                   <div className="flex gap-2">
                     <button onClick={() => setUsersPage(Math.max(0, usersPage - 1))} disabled={usersPage === 0} className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-50">{t("prev")}</button>
@@ -899,15 +969,17 @@ export default function AdminPage() {
             )}
           </div>
         )}
+
+        {/* SCANS TAB */}
         {activeTab === "scans" && (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-              <div className="flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl sm:rounded-3xl shadow-lg overflow-hidden transition-colors">
+            <div className="p-4 sm:p-6 border-b border-slate-100 dark:border-slate-700">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <h2 className="text-lg font-bold text-slate-900 dark:text-slate-50">{t("scanManagement")}</h2>
                 <select
                   value={scansFilter}
                   onChange={(e) => { setScansFilter(e.target.value); setScansPage(0); }}
-                  className="px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-50"
+                  className="px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-50 w-full sm:w-auto"
                 >
                   {diseaseOptions.map((opt) => (
                     <option key={opt} value={opt}>{opt === "all" ? t("all") : opt.replace(/_/g, " ")}</option>
@@ -921,57 +993,59 @@ export default function AdminPage() {
               <div className="p-8 text-center text-slate-400">{t("noScans")}</div>
             ) : (
               <>
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("prediction")}</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("confidence")}</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("severity")}</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("user")}</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("language")}</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("date")}</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("actions")}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {scans.map((scan) => (
-                      <tr key={scan.id} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                        <td className="px-4 py-3">
-                          <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${predictionColors[scan.prediction] ?? ""}`}>
-                            {scan.prediction.replace(/_/g, " ")}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            <div className="w-14 bg-slate-100 dark:bg-slate-700 rounded-full h-1.5">
-                              <div className="h-1.5 rounded-full bg-green-500" style={{ width: `${scan.confidence}%` }} />
-                            </div>
-                            <span className="text-xs font-semibold">{scan.confidence}%</span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-lg ${severityStyles[scan.severity] ?? severityStyles.low}`}>
-                            {scan.severity === "none" ? "healthy" : scan.severity}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div>
-                            <p className="text-sm font-medium text-slate-900 dark:text-slate-50">{displayName(scan.user_name, t)}</p>
-                            <p className="text-[10px] text-slate-400">{scan.user_phone}</p>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-sm">{langFlags[scan.lang] ?? "🌐"} {langLabels[scan.lang] ?? scan.lang}</td>
-                        <td className="px-4 py-3 text-xs text-slate-500">{formatDate(scan.created_at)}</td>
-                        <td className="px-4 py-3">
-                          <button onClick={() => handleDeleteScan(scan.id)} className="p-1.5 bg-red-100 dark:bg-red-900 text-red-600 rounded-lg hover:bg-red-200 dark:hover:bg-red-800">
-                            <Trash2 size={13} />
-                          </button>
-                        </td>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[700px]">
+                    <thead>
+                      <tr className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("prediction")}</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("confidence")}</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("severity")}</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("user")}</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("language")}</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("date")}</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{t("actions")}</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 dark:border-slate-700">
+                    </thead>
+                    <tbody>
+                      {scans.map((scan) => (
+                        <tr key={scan.id} className="border-b border-slate-50 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                          <td className="px-4 py-3">
+                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${predictionColors[scan.prediction] ?? ""}`}>
+                              {scan.prediction.replace(/_/g, " ")}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <div className="w-14 bg-slate-100 dark:bg-slate-700 rounded-full h-1.5">
+                                <div className="h-1.5 rounded-full bg-green-500" style={{ width: `${scan.confidence}%` }} />
+                              </div>
+                              <span className="text-xs font-semibold">{scan.confidence}%</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-lg ${severityStyles[scan.severity] ?? severityStyles.low}`}>
+                              {scan.severity === "none" ? "healthy" : scan.severity}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div>
+                              <p className="text-sm font-medium text-slate-900 dark:text-slate-50">{displayName(scan.user_name, t)}</p>
+                              <p className="text-[10px] text-slate-400">{scan.user_phone}</p>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-sm">{langFlags[scan.lang] ?? "🌐"} {langLabels[scan.lang] ?? scan.lang}</td>
+                          <td className="px-4 py-3 text-xs text-slate-500">{formatDate(scan.created_at)}</td>
+                          <td className="px-4 py-3">
+                            <button onClick={() => handleDeleteScan(scan.id)} className="p-1.5 bg-red-100 dark:bg-red-900 text-red-600 rounded-lg hover:bg-red-200 dark:hover:bg-red-800">
+                              <Trash2 size={13} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-t border-slate-200 dark:border-slate-700">
                   <span className="text-sm text-slate-500">{t("page")} {scansPage + 1} {t("of")} {Math.ceil(scansTotal / pageSize)}</span>
                   <div className="flex gap-2">
                     <button onClick={() => setScansPage(Math.max(0, scansPage - 1))} disabled={scansPage === 0} className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-50">{t("prev")}</button>
@@ -983,8 +1057,9 @@ export default function AdminPage() {
           </div>
         )}
 
+        {/* ACTIVITY TAB */}
         {activeTab === "activity" && (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm p-6">
+          <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl sm:rounded-3xl shadow-lg p-4 sm:p-6 transition-colors">
             <div className="flex items-center gap-2 mb-6">
               <Clock size={20} className="text-purple-600" />
               <h2 className="text-lg font-bold text-slate-900 dark:text-slate-50">{t("activityLog")}</h2>
@@ -996,9 +1071,9 @@ export default function AdminPage() {
             ) : (
               <div className="space-y-3">
                 {activity.map((item) => (
-                  <div key={item.id} className="flex items-start gap-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${item.type === "scan" ? "bg-green-100 dark:bg-green-900" : "bg-blue-100 dark:bg-blue-900"}`}>
-                      {item.type === "scan" ? <ScanSearch size={18} className="text-green-600" /> : <UserCheck size={18} className="text-blue-600" />}
+                  <div key={item.id} className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 bg-slate-50 dark:bg-slate-800 rounded-xl sm:rounded-2xl">
+                    <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 ${item.type === "scan" ? "bg-green-100 dark:bg-green-900" : "bg-blue-100 dark:bg-blue-900"}`}>
+                      {item.type === "scan" ? <ScanSearch size={16} className="text-green-600" /> : <UserCheck size={16} className="text-blue-600" />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-slate-900 dark:text-slate-50">
@@ -1026,41 +1101,64 @@ export default function AdminPage() {
           </div>
         )}
       </main>
-      {/* Register Modal */}
+
+      {/* ── REGISTER MODAL ── */}
       {showRegisterModal && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl w-full max-w-md p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-700 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50">{t("registerNewUser")}</h3>
-              <button onClick={() => setShowRegisterModal(false)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+              <button onClick={() => setShowRegisterModal(false)} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
                 <X size={20} className="text-slate-500" />
               </button>
             </div>
             <form onSubmit={handleRegister} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t("fullName")}</label>
-                <input type="text" required value={registerForm.full_name} onChange={(e) => setRegisterForm({ ...registerForm, full_name: e.target.value })} className="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-50" />
+                <input type="text" required value={registerForm.full_name} onChange={(e) => setRegisterForm({ ...registerForm, full_name: e.target.value })} className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-50" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t("phoneNumber")}</label>
-                <input type="tel" required value={registerForm.phone_number} onChange={(e) => setRegisterForm({ ...registerForm, phone_number: e.target.value })} className="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-50" />
+                <input type="tel" required value={registerForm.phone_number} onChange={(e) => setRegisterForm({ ...registerForm, phone_number: e.target.value })} className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-50" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t("password")}</label>
                 <input type="password" required value={registerForm.password} onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })} className="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-50" />
               </div>
+                            <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t("password")}</label>
+                <input
+                  type="password"
+                  required
+                  value={registerForm.password}
+                  onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })}
+                  className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-50"
+                />
+              </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t("selectRole")}</label>
-                <select value={registerForm.role} onChange={(e) => setRegisterForm({ ...registerForm, role: e.target.value })} className="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-50">
+                <select
+                  value={registerForm.role}
+                  onChange={(e) => setRegisterForm({ ...registerForm, role: e.target.value })}
+                  className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-50"
+                >
                   <option value="farmer">{t("farmer")}</option>
                   <option value="admin">{t("admin")}</option>
                 </select>
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setShowRegisterModal(false)} className="flex-1 px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-50">
+                <button
+                  type="button"
+                  onClick={() => setShowRegisterModal(false)}
+                  className="flex-1 px-4 py-2.5 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-50"
+                >
                   {t("cancel")}
                 </button>
-                <button type="submit" disabled={registerLoading} className="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-medium disabled:opacity-50">
+                <button
+                  type="submit"
+                  disabled={registerLoading}
+                  className="flex-1 px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-medium disabled:opacity-50"
+                >
                   {registerLoading ? "..." : t("registerBtn")}
                 </button>
               </div>
@@ -1069,13 +1167,13 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Reset Password Modal */}
+      {/* ── RESET PASSWORD MODAL ── */}
       {showResetModal && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl w-full max-w-md p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50">{t("resetPassword")}</h3>
-              <button onClick={() => setShowResetModal(false)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+              <button onClick={() => setShowResetModal(false)} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
                 <X size={20} className="text-slate-500" />
               </button>
             </div>
@@ -1112,13 +1210,13 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* View User Scans Modal */}
+      {/* ── VIEW USER SCANS MODAL ── */}
       {viewUserId && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl w-full max-w-2xl max-h-[80vh] overflow-y-auto p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50">User Scan History</h3>
-              <button onClick={() => { setViewUserId(null); setUserScans([]); }} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+              <button onClick={() => { setViewUserId(null); setUserScans([]); }} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
                 <X size={20} className="text-slate-500" />
               </button>
             </div>
@@ -1129,13 +1227,13 @@ export default function AdminPage() {
             ) : (
               <div className="space-y-3">
                 {userScans.map((scan: any) => (
-                  <div key={scan.id} className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                  <div key={scan.id} className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-slate-50 dark:bg-slate-800 rounded-xl">
                     <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${predictionColors[scan.prediction] ?? ""}`}>
                       {scan.prediction.replace(/_/g, " ")}
                     </span>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <div className="w-20 bg-slate-200 dark:bg-slate-700 rounded-full h-1.5">
+                        <div className="w-16 sm:w-20 bg-slate-200 dark:bg-slate-700 rounded-full h-1.5">
                           <div className="h-1.5 rounded-full bg-green-500" style={{ width: `${scan.confidence}%` }} />
                         </div>
                         <span className="text-xs font-semibold">{scan.confidence}%</span>

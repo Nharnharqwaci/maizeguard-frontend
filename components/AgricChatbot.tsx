@@ -62,7 +62,7 @@ const LANGUAGE_LABELS: Record<Language, string> = {
 
 const LANGUAGE_GREETINGS: Record<Language, string> = {
   en: "Hello! I'm your Agricultural AI Officer.",
-  tw: "Akwaba! Me yɛ wo Agricultural AI Officer.",
+  tw: "Akwaba! Me yɛ wo Kuadwuma afiri nyansa mu panin.",
   dag: "Antire! N yɛ wo Agricultural AI Officer.",
 };
 
@@ -1099,7 +1099,7 @@ export default function AgricChatbot({
                     <Loader2 size={14} className="animate-spin text-green-600" />
                     <span className="text-xs text-slate-500 dark:text-slate-400">
                       {activeLanguage === "tw"
-                        ? "Agricultural Officer reyɛ adwuma..."
+                        ? "Kuadwuma afiri nyansa mu panin reyɛ adwuma..."
                         : activeLanguage === "dag"
                         ? "Agricultural Officer n-yɛli..."
                         : "Agricultural Officer is typing..."}
@@ -1195,7 +1195,7 @@ export default function AgricChatbot({
                 </button>
               </div>
               <p className="text-xs text-slate-400 dark:text-slate-500 mt-1.5 text-center">
-                AI Agricultural Officer · {LANGUAGE_LABELS[activeLanguage]} · Powered by Groq & MMS
+                AI Agricultural Officer · {LANGUAGE_LABELS[activeLanguage]} · Powered by Groq
               </p>
             </div>
           </div>

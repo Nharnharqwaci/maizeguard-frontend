@@ -59,7 +59,7 @@ const T: Record<string, Record<Language, string>> = {
   },
   step3Desc: {
     en: "The system provides a clear diagnosis which is Healthy, MSV, Common Rust, Gray Leaf Spot, Northern Leaf Blight, or Southern Leaf Blight with tailored treatment recommendations.",
-    tw: "Nhyehyɛe no ma wohu yareɛ a ɛda adi pefee a ɛyɛ Apɔwmuden, MSV, Common Rust, Grey Leaf Spot, Northern Leaf Blight, anaa Southern Leaf Blight a wɔde ayaresa ho nyansahyɛ a wɔayɛ ama.",
+    tw: "Eyi bɛma wo mmuaeɛ a emu da hɔ fann a ɛfa nwura no ahoɔden tebea ho: sɛ ɛyɛ deɛ ahoɔden wɔ mu (Healthy), Ahaban nsensaneeɛ(MSV), Aburoo mfofoeeɛ(Common Rust), Ahaban nkaeɛ kɔkɔbiri(Gray Leaf Spot), Ahaban hyeeɛ kɛseɛ(Northern Leaf Blight), anaa Ahaban hyeeɛ nketewa(Southern Leaf Blight), ɛna ama wo nsaano nnuro ne afutuo a ɛbɛsa yadeɛ no pɔtee.",
     dag: "N-niŋsim n-nya diagnosis: Kpalim zaa, MSV, Common Rust, Gray Leaf Spot, Northern Leaf Blight, bee Southern Leaf Blight, ni kyaŋsim.",
   },
   techStackTitle: {
