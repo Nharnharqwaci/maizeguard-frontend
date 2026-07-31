@@ -334,67 +334,93 @@ function YouTubeEmbed({
   channel,
   url,
 }: VideoItem) {
-  const [playing, setPlaying] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [failed, setFailed] = useState(false);
 
-  const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1`;
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    if (open) window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [open]);
+
+  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
 
   return (
-    <div className="relative aspect-video w-full overflow-hidden rounded-xl">
-      {playing ? (
-        <iframe
-          src={embedUrl}
-          title={title}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-          referrerPolicy="strict-origin-when-cross-origin"
-          className="absolute inset-0 h-full w-full"
-          loading="lazy"
+    <>
+      {/* Thumbnail */}
+      <button
+        onClick={() => setOpen(true)}
+        className="relative aspect-video w-full overflow-hidden rounded-xl block bg-black group text-left"
+        aria-label={`Play: ${title}`}
+      >
+        <img
+          src={thumbnail || `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`}
+          alt={title}
+          className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
         />
-      ) : (
-        <button
-          onClick={() => setPlaying(true)}
-          className="relative w-full aspect-video group block bg-black"
-          aria-label={`Play: ${title}`}
-        >
-          <img
-            src={thumbnail || `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`}
-            alt={title}
-            className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
-          />
-          <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-16 h-16 bg-red-600 hover:bg-red-500 rounded-full flex items-center justify-center transition-colors shadow-xl">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="white"
-                className="w-7 h-7 ml-1"
-              >
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            </div>
+        <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-16 h-16 bg-red-600 group-hover:bg-red-500 rounded-full flex items-center justify-center transition-colors shadow-xl">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" className="w-7 h-7 ml-1">
+              <path d="M8 5v14l11-7z" />
+            </svg>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-3">
-            <p className="text-white text-xs font-semibold line-clamp-2 text-left leading-tight">
-              {title}
-            </p>
-            {channel && (
-              <p className="text-white/60 text-xs mt-0.5">{channel}</p>
+        </div>
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-3">
+          <p className="text-white text-xs font-semibold line-clamp-2 leading-tight">{title}</p>
+          {channel && <p className="text-white/60 text-xs mt-0.5">{channel}</p>}
+        </div>
+      </button>
+
+      {/* Modal */}
+      {open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+          onClick={() => setOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-4xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close */}
+            <button
+              onClick={() => setOpen(false)}
+              className="absolute top-3 right-3 z-10 w-10 h-10 bg-black/60 hover:bg-black/80 text-white rounded-full flex items-center justify-center transition-colors"
+              aria-label="Close"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+
+            {failed ? (
+              /* Fallback if iframe is blocked */
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 text-white p-8">
+                <p className="text-lg font-semibold mb-4">Video player blocked by browser security</p>
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-red-600 hover:bg-red-500 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
+                >
+                  Watch on YouTube →
+                </a>
+              </div>
+            ) : (
+              <iframe
+                src={embedUrl}
+                title={title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                referrerPolicy="strict-origin-when-cross-origin"
+                className="absolute inset-0 h-full w-full"
+                onError={() => setFailed(true)}
+              />
             )}
           </div>
-        </button>
+        </div>
       )}
-      {/* Watch on YouTube link */}
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center justify-center gap-1.5 py-2 bg-slate-900 hover:bg-slate-800 text-white/70 hover:text-white text-xs transition-colors"
-      >
-        <ExternalLink size={11} />
-        Watch on YouTube
-      </a>
-    </div>
+    </>
   );
 }
 
