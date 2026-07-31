@@ -335,6 +335,12 @@ function YouTubeEmbed({
   url,
 }: VideoItem) {
   const [open, setOpen] = useState(false);
+  // Try the provided thumbnail first, then YouTube's hqdefault
+  const [imgSrc, setImgSrc] = useState(
+    thumbnail && thumbnail.trim() !== ""
+      ? thumbnail
+      : `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+  );
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -352,6 +358,15 @@ function YouTubeEmbed({
 
   const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
 
+  // If hqdefault fails, try mqdefault, then default
+  const handleImgError = () => {
+    if (imgSrc.includes("/hqdefault.jpg")) {
+      setImgSrc(`https://img.youtube.com/vi/${videoId}/mqdefault.jpg`);
+    } else if (imgSrc.includes("/mqdefault.jpg")) {
+      setImgSrc(`https://img.youtube.com/vi/${videoId}/default.jpg`);
+    }
+  };
+
   return (
     <>
       {/* Thumbnail */}
@@ -361,8 +376,9 @@ function YouTubeEmbed({
         aria-label={`Play: ${title}`}
       >
         <img
-          src={thumbnail || `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`}
+          src={imgSrc}
           alt={title}
+          onError={handleImgError}
           className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
         />
         <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
@@ -389,7 +405,6 @@ function YouTubeEmbed({
             className="relative w-full max-w-4xl bg-black rounded-2xl overflow-hidden shadow-2xl flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close */}
             <button
               onClick={() => setOpen(false)}
               className="absolute top-3 right-3 z-10 w-10 h-10 bg-black/60 hover:bg-black/80 text-white rounded-full flex items-center justify-center transition-colors"
@@ -398,7 +413,6 @@ function YouTubeEmbed({
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
 
-            {/* Video wrapper */}
             <div className="relative aspect-video w-full bg-black">
               <iframe
                 src={embedUrl}
@@ -410,7 +424,6 @@ function YouTubeEmbed({
               />
             </div>
 
-            {/* Fallback bar — always visible so users are never stuck */}
             <div className="bg-slate-900 border-t border-slate-700 p-3 flex items-center justify-between">
               <p className="text-slate-300 text-sm truncate pr-4">{title}</p>
               <a
